@@ -5,11 +5,18 @@
 }
 
 .main-content {
-  display: flex;
-  gap: 24px;
-  max-width: 1200px;
+  width: 90%;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 20px 16px;
+  padding: 20px 0;
+}
+
+.home-view,
+.trade-view,
+.portfolio-view,
+.leaderboard-view,
+.info-view {
+  width: 100%;
 }
 
 .content-left {
@@ -165,20 +172,17 @@
 
 /* Portfolio View */
 .portfolio-view {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 /* Leaderboard View */
 .leaderboard-view {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 /* Info View */
 .info-view {
-  max-width: 800px;
-  margin: 0 auto;
+  width: 100%;
 }
 
 .info-header {
