@@ -85,10 +85,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0;
+  width: 90%;
   height: 68px;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
+  gap: 32px;
 }
 
 .header-left {
@@ -103,9 +105,10 @@
   gap: 12px;
   cursor: pointer;
   transition: all var(--transition-base);
-  padding: 8px 12px;
-  margin: -8px -12px;
+  padding: 8px 16px;
   border-radius: var(--radius-lg);
+  position: relative;
+  z-index: 2;
 }
 
 .logo:hover {

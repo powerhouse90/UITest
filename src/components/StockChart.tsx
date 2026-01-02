@@ -61,14 +61,27 @@ export function StockChart({ data, token }: StockChartProps) {
 
     const handleResize = () => {
       if (chartContainerRef.current) {
-        chart.applyOptions({ width: chartContainerRef.current.clientWidth });
+        chart.applyOptions({ 
+          width: chartContainerRef.current.clientWidth,
+          height: chartContainerRef.current.clientHeight || 350
+        });
       }
     };
+
+    // Use ResizeObserver for more reliable resizing
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+
+    if (chartContainerRef.current) {
+      resizeObserver.observe(chartContainerRef.current);
+    }
 
     window.addEventListener('resize', handleResize);
 
     return () => {
       window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
       chart.remove();
     };
   }, [data, lineColor]);
