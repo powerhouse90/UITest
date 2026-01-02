@@ -9,6 +9,73 @@
   transition: all var(--transition-base);
 }
 
+/* Treasury Banner */
+.treasury-banner {
+  background: linear-gradient(90deg, rgba(0, 214, 50, 0.1) 0%, rgba(0, 214, 50, 0.05) 50%, rgba(0, 214, 50, 0.1) 100%);
+  border-bottom: 1px solid rgba(0, 214, 50, 0.2);
+  padding: 8px 0;
+}
+
+.treasury-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 32px;
+  flex-wrap: wrap;
+}
+
+.treasury-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.treasury-item svg {
+  color: var(--green-primary);
+}
+
+.treasury-label {
+  color: var(--text-muted);
+}
+
+.treasury-value {
+  color: var(--green-primary);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.treasury-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.treasury-progress-bar {
+  width: 120px;
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.treasury-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-primary), var(--green-dark));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 8px var(--green-glow);
+}
+
+.treasury-target {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
 .header.scrolled {
   background: rgba(0, 0, 0, 0.98);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
@@ -344,6 +411,33 @@
   }
   
   .logo-badge {
+    display: none;
+  }
+
+  .treasury-banner {
+    padding: 6px 0;
+  }
+
+  .treasury-content {
+    padding: 0 16px;
+    gap: 16px;
+  }
+
+  .treasury-item {
+    font-size: 11px;
+  }
+
+  .treasury-progress-bar {
+    width: 80px;
+  }
+
+  .treasury-target {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .treasury-progress-container {
     display: none;
   }
 }

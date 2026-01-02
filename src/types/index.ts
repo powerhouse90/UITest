@@ -116,3 +116,51 @@ export interface PortfolioStats {
   openPositions: number;
   spotHoldings: number;
 }
+
+// Platform treasury stats
+export interface TreasuryStats {
+  totalBalance: number;
+  tokensLaunched: number;
+  totalVolumeAllTime: number;
+  feesCollected: number;
+  nextLaunchSeed: number;
+  targetForMainLaunch: number;
+}
+
+// User's airdrop eligibility tracking
+export interface AirdropEligibility {
+  isEligible: boolean;
+  tokensHeld: number;
+  totalTokensLaunched: number;
+  snapshotsPassed: number;
+  totalSnapshots: number;
+  holdingStreak: number;
+  neverSold: boolean;
+  estimatedAllocation: number;
+}
+
+// Individual token holding record for airdrop tracking
+export interface TokenHoldingRecord {
+  tokenId: string;
+  tokenTicker: string;
+  isHolding: boolean;
+  hasSold: boolean;
+  snapshotsCaptured: number;
+  firstBuyTime?: Date;
+}
+
+// Fee distribution breakdown
+export interface FeeDistribution {
+  treasuryPercent: number;
+  holdersPercent: number;
+  seedContributorsPercent: number;
+  burnPercent: number;
+}
+
+// HODLer rewards info
+export interface HodlerRewards {
+  totalEarned: number;
+  pendingRewards: number;
+  lastClaimTime?: Date;
+  multiplier: number; // Based on holding duration
+}

@@ -5,6 +5,7 @@ import { StockChart } from './components/StockChart';
 import { TradingPanel } from './components/TradingPanel';
 import { Portfolio } from './components/Portfolio';
 import { Leaderboard } from './components/Watchlist';
+import { HodlerRewards } from './components/HodlerRewards';
 import { todayToken, mockPositions, mockSpotHoldings, mockLeaderboard, generateMemeChartData } from './data/mockData';
 import './App.css';
 
@@ -35,6 +36,7 @@ function App() {
         {currentTab === 'home' && (
           <div className="home-view">
             <TokenHero token={todayToken} onTrade={handleTrade} />
+            <HodlerRewards isConnected={isConnected} />
             <StockChart data={chartData} token={todayToken} />
           </div>
         )}
@@ -98,6 +100,7 @@ function App() {
                     <span className="sell-rate">5% Sell</span>
                   </div>
                 </div>
+                <p style={{marginTop: '12px'}}>Asymmetric taxes at launch prevent early dumps. As TVL grows to $10k, taxes converge to 5%/5%. This incentivizes diamond hands!</p>
               </div>
 
               <div className="info-card">
@@ -107,9 +110,38 @@ function App() {
               </div>
 
               <div className="info-card highlight">
+                <div className="info-card-icon">💎</div>
+                <h3>Diamond Hands Rewards</h3>
+                <p><strong>HODLers earn fees!</strong> 40% of all trading fees are redistributed to holders who buy and never sell. Plus, random daily snapshots track your holdings for airdrop eligibility!</p>
+              </div>
+
+              <div className="info-card">
+                <div className="info-card-icon">🎁</div>
+                <h3>Airdrop Eligibility</h3>
+                <p>The platform takes random daily snapshots of token holders. If you're holding tokens and have never sold, you're building eligibility for the main $CASINO token airdrop!</p>
+              </div>
+
+              <div className="info-card">
+                <div className="info-card-icon">🏦</div>
+                <h3>Treasury Growth</h3>
+                <p>40% of fees go to the treasury, accumulating toward the main token launch (like Pump.fun's model). When the treasury hits the target, $CASINO launches and gets distributed to diamond hands!</p>
+              </div>
+
+              <div className="info-card">
+                <div className="info-card-icon">🔥</div>
+                <h3>Fee Distribution</h3>
+                <div className="fee-breakdown">
+                  <div className="fee-item"><span className="fee-percent">40%</span> Treasury</div>
+                  <div className="fee-item"><span className="fee-percent">40%</span> HODLers</div>
+                  <div className="fee-item"><span className="fee-percent">15%</span> Seed Contributors</div>
+                  <div className="fee-item"><span className="fee-percent">5%</span> Burn</div>
+                </div>
+              </div>
+
+              <div className="info-card highlight">
                 <div className="info-card-icon">🎯</div>
                 <h3>The Daily Game</h3>
-                <p>Snipe early, bet big, hype on X, and either moon or get rekt. It's a daily event casino — come back tomorrow for fresh opportunities!</p>
+                <p>Snipe early, bet big, hype on X, and either moon or get rekt. Hold your winners for rewards. It's a daily event casino — come back tomorrow for fresh opportunities!</p>
               </div>
             </div>
           </div>

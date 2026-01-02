@@ -1,0 +1,414 @@
+.hodler-rewards {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.hodler-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.hodler-icon {
+  color: var(--green-primary);
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { filter: drop-shadow(0 0 4px var(--green-glow)); }
+  50% { filter: drop-shadow(0 0 12px var(--green-glow-intense)); transform: rotate(5deg); }
+}
+
+.hodler-header h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.hodler-badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  background: var(--green-bg);
+  color: var(--green-primary);
+  border: 1px solid var(--green-primary);
+}
+
+.connect-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-muted);
+  gap: 16px;
+}
+
+.connect-prompt svg {
+  color: var(--green-primary);
+  opacity: 0.5;
+}
+
+.connect-prompt p {
+  font-size: 14px;
+  max-width: 300px;
+}
+
+/* Eligibility Section */
+.eligibility-section,
+.rewards-section,
+.holdings-status {
+  padding: 20px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+}
+
+.eligibility-section h3,
+.rewards-section h3,
+.holdings-status h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.eligibility-section h3 svg,
+.rewards-section h3 svg,
+.holdings-status h3 svg {
+  color: var(--green-primary);
+}
+
+.eligibility-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.eligibility-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-base);
+}
+
+.eligibility-stat:hover {
+  border-color: var(--border-light);
+}
+
+.eligibility-stat .stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.eligibility-stat .stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.eligibility-stat .stat-sublabel {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.eligibility-stat.positive .stat-value {
+  color: var(--green-primary);
+}
+
+.eligibility-stat.negative .stat-value {
+  color: var(--red-primary);
+}
+
+.estimated-allocation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--green-bg) 0%, transparent 100%);
+  border: 1px solid var(--green-primary);
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+}
+
+.allocation-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.allocation-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--green-primary);
+  text-shadow: 0 0 20px var(--green-glow);
+}
+
+.eligibility-info {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--green-primary);
+}
+
+.eligibility-info p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Rewards Section */
+.rewards-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.reward-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reward-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.reward-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.reward-value.positive {
+  color: var(--green-primary);
+}
+
+.reward-value.multiplier {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.claim-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, var(--green-primary) 0%, var(--green-dark) 100%);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #000;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  margin-bottom: 20px;
+}
+
+.claim-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--green-glow-intense);
+}
+
+.fee-distribution h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.distribution-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.distribution-item {
+  display: grid;
+  grid-template-columns: 70px 1fr 40px;
+  align-items: center;
+  gap: 12px;
+}
+
+.distribution-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.distribution-bar {
+  height: 8px;
+  background: var(--bg-card);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.distribution-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.distribution-fill.treasury {
+  background: linear-gradient(90deg, #4a9eff, #2563eb);
+}
+
+.distribution-fill.holders {
+  background: linear-gradient(90deg, var(--green-primary), var(--green-dark));
+}
+
+.distribution-fill.seed {
+  background: linear-gradient(90deg, #ffd700, #ffa500);
+}
+
+.distribution-fill.burn {
+  background: linear-gradient(90deg, var(--red-primary), #cc0000);
+}
+
+.distribution-percent {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+/* Holdings Status */
+.holdings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.holding-record {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  transition: all var(--transition-base);
+}
+
+.holding-record:hover {
+  border-color: var(--border-light);
+}
+
+.holding-record.holding {
+  border-color: rgba(0, 214, 50, 0.3);
+  background: rgba(0, 214, 50, 0.05);
+}
+
+.holding-record.sold {
+  border-color: rgba(255, 59, 59, 0.3);
+  background: rgba(255, 59, 59, 0.05);
+}
+
+.holding-token {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.token-ticker {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.snapshot-count {
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.status-badge.holding {
+  background: var(--green-bg);
+  color: var(--green-primary);
+}
+
+.status-badge.sold {
+  background: rgba(255, 59, 59, 0.1);
+  color: var(--red-primary);
+}
+
+.status-badge.none {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .eligibility-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .rewards-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .rewards-stats .reward-stat:last-child {
+    grid-column: span 2;
+    text-align: center;
+  }
+
+  .hodler-rewards {
+    padding: 16px;
+  }
+
+  .eligibility-section,
+  .rewards-section,
+  .holdings-status {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .eligibility-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .eligibility-stat .stat-value {
+    font-size: 22px;
+  }
+
+  .allocation-value {
+    font-size: 16px;
+  }
+}

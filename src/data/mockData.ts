@@ -1,4 +1,4 @@
-import type { ChartData, MemeToken, Position, SpotHolding, LeaderboardEntry } from '../types';
+import type { ChartData, MemeToken, Position, SpotHolding, LeaderboardEntry, TreasuryStats, AirdropEligibility, TokenHoldingRecord, FeeDistribution, HodlerRewards } from '../types';
 
 // Today's featured meme token
 export const todayToken: MemeToken = {
@@ -208,4 +208,69 @@ export const getTimeUntilNextLaunch = (): string => {
   const seconds = Math.floor((diff % (1000 * 60)) / 1000);
   
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
+
+// Platform treasury stats
+export const mockTreasuryStats: TreasuryStats = {
+  totalBalance: 42069.50,
+  tokensLaunched: 47,
+  totalVolumeAllTime: 2450000,
+  feesCollected: 89420.69,
+  nextLaunchSeed: 350,
+  targetForMainLaunch: 100000,
+};
+
+// User's airdrop eligibility
+export const mockAirdropEligibility: AirdropEligibility = {
+  isEligible: true,
+  tokensHeld: 12,
+  totalTokensLaunched: 47,
+  snapshotsPassed: 38,
+  totalSnapshots: 47,
+  holdingStreak: 5,
+  neverSold: true,
+  estimatedAllocation: 2450,
+};
+
+// User's token holding records
+export const mockHoldingRecords: TokenHoldingRecord[] = [
+  {
+    tokenId: 'pepe-trump-2026',
+    tokenTicker: '$PTRUMP',
+    isHolding: true,
+    hasSold: false,
+    snapshotsCaptured: 1,
+    firstBuyTime: new Date(Date.now() - 3600000),
+  },
+  {
+    tokenId: 'cat-wif-hat',
+    tokenTicker: '$CWH',
+    isHolding: true,
+    hasSold: false,
+    snapshotsCaptured: 3,
+    firstBuyTime: new Date(Date.now() - 172800000),
+  },
+  {
+    tokenId: 'doge-elon',
+    tokenTicker: '$DELON',
+    isHolding: false,
+    hasSold: true,
+    snapshotsCaptured: 0,
+  },
+];
+
+// Fee distribution breakdown
+export const feeDistribution: FeeDistribution = {
+  treasuryPercent: 40,
+  holdersPercent: 40,
+  seedContributorsPercent: 15,
+  burnPercent: 5,
+};
+
+// User's HODLer rewards
+export const mockHodlerRewards: HodlerRewards = {
+  totalEarned: 156.42,
+  pendingRewards: 23.50,
+  lastClaimTime: new Date(Date.now() - 86400000),
+  multiplier: 1.5,
 };

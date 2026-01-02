@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Clock, TrendingUp, TrendingDown, Zap } from 'lucide-react';
+import { Clock, TrendingUp, TrendingDown, Zap, Diamond, Info } from 'lucide-react';
 import type { MemeToken } from '../types';
-import { getTimeUntilNextLaunch } from '../data/mockData';
+import { getTimeUntilNextLaunch, mockTreasuryStats } from '../data/mockData';
 import './TokenHero.css';
 
 interface TokenHeroProps {
@@ -12,6 +12,7 @@ interface TokenHeroProps {
 export function TokenHero({ token, onTrade }: TokenHeroProps) {
   const [countdown, setCountdown] = useState(getTimeUntilNextLaunch());
   const isPositive = token.priceChangePercent24h >= 0;
+  const tvlProgress = Math.min((token.tvl / 10000) * 100, 100);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -69,23 +70,48 @@ export function TokenHero({ token, onTrade }: TokenHeroProps) {
 
       {/* Tax section */}
       <div className="hero-taxes">
-        <div className="tax-item">
-          <span className="tax-label">Buy Tax</span>
-          <span className="tax-value buy">{token.buyTax.toFixed(1)}%</span>
+        <div className="tax-header">
+          <span className="tax-title">Dynamic Tax Rate</span>
+          <span className="tax-info">
+            <Info size={12} />
+            Converges as TVL grows
+          </span>
         </div>
-        <div className="tax-progress">
-          <div className="tax-progress-label">→ 5%/5% at $10k TVL</div>
-          <div className="tax-progress-bar">
-            <div 
-              className="tax-progress-fill" 
-              style={{ width: `${Math.min((token.tvl / 10000) * 100, 100)}%` }} 
-            />
+        <div className="tax-row">
+          <div className="tax-item">
+            <span className="tax-label">Buy</span>
+            <span className="tax-value buy">{token.buyTax.toFixed(1)}%</span>
+          </div>
+          <div className="tax-progress">
+            <div className="tax-progress-bar">
+              <div 
+                className="tax-progress-fill" 
+                style={{ width: `${tvlProgress}%` }} 
+              />
+            </div>
+            <span className="tax-progress-label">{tvlProgress.toFixed(0)}% to 5%/5%</span>
+          </div>
+          <div className="tax-item">
+            <span className="tax-label">Sell</span>
+            <span className="tax-value sell">{token.sellTax.toFixed(1)}%</span>
           </div>
         </div>
-        <div className="tax-item">
-          <span className="tax-label">Sell Tax</span>
-          <span className="tax-value sell">{token.sellTax.toFixed(1)}%</span>
+      </div>
+
+      {/* HODLer incentive banner */}
+      <div className="hodler-banner">
+        <Diamond size={16} className="banner-icon" />
+        <div className="banner-content">
+          <span className="banner-title">Diamond Hands Bonus</span>
+          <span className="banner-text">Buy & HODL to earn fee redistribution + airdrop eligibility</span>
         </div>
+      </div>
+
+      {/* Seed info */}
+      <div className="seed-info">
+        <span className="seed-label">Initial Seed:</span>
+        <span className="seed-value">${mockTreasuryStats.nextLaunchSeed}</span>
+        <span className="seed-source">from Treasury</span>
       </div>
 
       {/* Trade button */}

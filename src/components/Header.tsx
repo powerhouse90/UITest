@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Wallet, Home, TrendingUp, Trophy, Info, Menu, X } from 'lucide-react';
+import { Wallet, Home, TrendingUp, Trophy, Info, Menu, X, Vault, Flame } from 'lucide-react';
+import { mockTreasuryStats } from '../data/mockData';
 import './Header.css';
 
 interface HeaderProps {
@@ -20,8 +21,35 @@ export function Header({ currentTab, onTabChange, isConnected, onConnect }: Head
     { id: 'info', label: 'How It Works', icon: Info },
   ];
 
+  const treasuryProgress = (mockTreasuryStats.totalBalance / mockTreasuryStats.targetForMainLaunch) * 100;
+
   return (
     <header className="header">
+      {/* Treasury Banner */}
+      <div className="treasury-banner">
+        <div className="treasury-content">
+          <div className="treasury-item">
+            <Vault size={14} />
+            <span className="treasury-label">Treasury:</span>
+            <span className="treasury-value">${mockTreasuryStats.totalBalance.toLocaleString()}</span>
+          </div>
+          <div className="treasury-progress-container">
+            <div className="treasury-progress-bar">
+              <div 
+                className="treasury-progress-fill" 
+                style={{ width: `${Math.min(treasuryProgress, 100)}%` }}
+              />
+            </div>
+            <span className="treasury-target">{treasuryProgress.toFixed(1)}% to main launch</span>
+          </div>
+          <div className="treasury-item">
+            <Flame size={14} />
+            <span className="treasury-label">Tokens Launched:</span>
+            <span className="treasury-value">{mockTreasuryStats.tokensLaunched}</span>
+          </div>
+        </div>
+      </div>
+
       <div className="header-content">
         <div className="header-left">
           <div className="logo" onClick={() => onTabChange('home')}>
