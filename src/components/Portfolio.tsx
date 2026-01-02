@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, X } from 'lucide-react';
+import { TrendingUp, X, Plus } from 'lucide-react';
 import type { Position, SpotHolding } from '../types';
 import './Portfolio.css';
 
@@ -12,69 +12,111 @@ export function Portfolio({ positions, spotHoldings }: PortfolioProps) {
   const totalSpotValue = spotHoldings.reduce((sum, h) => sum + h.value, 0);
   const totalPnl = positions.reduce((sum, p) => sum + p.pnl, 0) + 
                    spotHoldings.reduce((sum, h) => sum + h.pnl, 0);
+  const totalPnlPercent = ((totalPnl / (totalPositionsValue + totalSpotValue - totalPnl)) * 100) || 0;
 
   return (
     <div className="portfolio">
-      {/* Portfolio Summary */}
+      {/* Portfolio Summary Cards */}
       <div className="portfolio-summary">
-        <div className="summary-main">
-          <span className="summary-label">Portfolio Value</span>
-          <span className="summary-value">${(totalPositionsValue + totalSpotValue).toFixed(2)}</span>
-          <span className={`summary-pnl ${totalPnl >= 0 ? 'positive' : 'negative'}`}>
+        <div className="summary-card highlight">
+          <div className="summary-card-label">Portfolio Value</div>
+          <div className="summary-card-value">${(totalPositionsValue + totalSpotValue).toFixed(2)}</div>
+          <div className={`summary-card-change ${totalPnl >= 0 ? 'positive' : 'negative'}`}>
             {totalPnl >= 0 ? '+' : ''}${totalPnl.toFixed(2)} today
-          </span>
+          </div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-card-label">Open Positions</div>
+          <div className="summary-card-value">{positions.length}</div>
+          <div className="summary-card-change">Active trades</div>
+        </div>
+        <div className="summary-card">
+          <div className="summary-card-label">Spot Holdings</div>
+          <div className="summary-card-value">{spotHoldings.length}</div>
+          <div className={`summary-card-change ${totalPnlPercent >= 0 ? 'positive' : 'negative'}`}>
+            {totalPnlPercent >= 0 ? '+' : ''}{totalPnlPercent.toFixed(1)}% overall
+          </div>
         </div>
       </div>
 
       {/* Open Positions */}
       <div className="portfolio-section">
-        <h3 className="section-title">
-          <TrendingUp size={18} />
-          Open Positions
-          <span className="section-count">{positions.length}</span>
-        </h3>
+        <div className="section-header">
+          <h3 className="section-title">
+            <TrendingUp size={18} />
+            Open Positions
+            <span className="section-badge">{positions.length}</span>
+          </h3>
+          <button className="section-action">View All</button>
+        </div>
         
         {positions.length === 0 ? (
-          <div className="empty-state">No open positions</div>
+          <div className="empty-state">
+            <div className="empty-state-icon">📊</div>
+            <div className="empty-state-title">No Open Positions</div>
+            <div className="empty-state-text">Start trading to see your positions here</div>
+            <button className="empty-state-btn">
+              <Plus size={16} />
+              Open Position
+            </button>
+          </div>
         ) : (
           <div className="positions-list">
             {positions.map(position => (
               <div key={position.id} className="position-card">
                 <div className="position-header">
-                  <div className="position-token">
-                    <span className={`position-direction ${position.type}`}>
-                      {position.type === 'long' ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                      {position.type.toUpperCase()}
-                    </span>
-                    <span className="position-ticker">{position.tokenTicker}</span>
-                    <span className="position-leverage">{position.leverage}x</span>
+                  <div className="position-info">
+                    <div className="position-icon">
+                      {position.type === 'long' ? '📈' : '📉'}
+                    </div>
+                    <div className="position-details">
+                      <span className="position-name">{position.tokenTicker}</span>
+                      <div className="position-type">
+                        <span className={`position-direction ${position.type}`}>
+                          {position.type.toUpperCase()}
+                        </span>
+                        <span className="position-leverage">{position.leverage}x</span>
+                      </div>
+                    </div>
                   </div>
-                  <button className="close-btn">
-                    <X size={16} />
-                  </button>
+                  <div className="position-pnl">
+                    <div className={`position-pnl-value ${position.pnl >= 0 ? 'positive' : 'negative'}`}>
+                      {position.pnl >= 0 ? '+' : ''}${position.pnl.toFixed(2)}
+                    </div>
+                    <div className={`position-pnl-percent ${position.pnl >= 0 ? 'positive' : 'negative'}`}>
+                      {position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(1)}%
+                    </div>
+                  </div>
                 </div>
                 
-                <div className="position-details">
-                  <div className="detail-row">
-                    <span className="detail-label">Size</span>
-                    <span className="detail-value">${position.size.toFixed(2)}</span>
+                <div className="position-stats">
+                  <div className="position-stat">
+                    <span className="position-stat-label">Size</span>
+                    <span className="position-stat-value">${position.size.toFixed(2)}</span>
                   </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Entry</span>
-                    <span className="detail-value">${position.entryPrice.toFixed(8)}</span>
+                  <div className="position-stat">
+                    <span className="position-stat-label">Entry Price</span>
+                    <span className="position-stat-value">${position.entryPrice.toFixed(8)}</span>
                   </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Liq. Price</span>
-                    <span className="detail-value warning">${position.liquidationPrice.toFixed(8)}</span>
+                  <div className="position-stat">
+                    <span className="position-stat-label">Mark Price</span>
+                    <span className="position-stat-value">${position.currentPrice.toFixed(8)}</span>
+                  </div>
+                  <div className="position-stat">
+                    <span className="position-stat-label">Liq. Price</span>
+                    <span className="position-stat-value danger">${position.liquidationPrice.toFixed(8)}</span>
                   </div>
                 </div>
 
-                <div className={`position-pnl ${position.pnl >= 0 ? 'positive' : 'negative'}`}>
-                  <span className="pnl-label">PnL</span>
-                  <span className="pnl-value">
-                    {position.pnl >= 0 ? '+' : ''}${position.pnl.toFixed(2)}
-                    <span className="pnl-percent">({position.pnl >= 0 ? '+' : ''}{position.pnlPercent.toFixed(1)}%)</span>
-                  </span>
+                <div className="position-actions">
+                  <button className="position-btn close">
+                    <X size={14} />
+                    Close Position
+                  </button>
+                  <button className="position-btn add">
+                    <Plus size={14} />
+                    Add Margin
+                  </button>
                 </div>
               </div>
             ))}
@@ -84,31 +126,42 @@ export function Portfolio({ positions, spotHoldings }: PortfolioProps) {
 
       {/* Spot Holdings */}
       <div className="portfolio-section">
-        <h3 className="section-title">
-          💰 Spot Holdings
-          <span className="section-count">{spotHoldings.length}</span>
-        </h3>
+        <div className="section-header">
+          <h3 className="section-title">
+            💰 Spot Holdings
+            <span className="section-badge">{spotHoldings.length}</span>
+          </h3>
+          <button className="section-action">View All</button>
+        </div>
         
         {spotHoldings.length === 0 ? (
-          <div className="empty-state">No spot holdings</div>
+          <div className="empty-state">
+            <div className="empty-state-icon">💎</div>
+            <div className="empty-state-title">No Spot Holdings</div>
+            <div className="empty-state-text">Buy some tokens to see them here</div>
+            <button className="empty-state-btn">
+              <Plus size={16} />
+              Buy Tokens
+            </button>
+          </div>
         ) : (
           <div className="holdings-list">
             {spotHoldings.map(holding => (
               <div key={holding.tokenId} className="holding-card">
                 <div className="holding-info">
-                  <span className="holding-image">{holding.tokenImage}</span>
+                  <div className="holding-icon">{holding.tokenImage}</div>
                   <div className="holding-details">
-                    <span className="holding-ticker">{holding.tokenTicker}</span>
+                    <span className="holding-name">{holding.tokenTicker}</span>
                     <span className="holding-amount">
                       {holding.amount.toLocaleString()} tokens
                     </span>
                   </div>
                 </div>
                 <div className="holding-value">
-                  <span className="value-usd">${holding.value.toFixed(2)}</span>
-                  <span className={`value-pnl ${holding.pnl >= 0 ? 'positive' : 'negative'}`}>
+                  <div className="holding-value-usd">${holding.value.toFixed(2)}</div>
+                  <div className={`holding-pnl ${holding.pnl >= 0 ? 'positive' : 'negative'}`}>
                     {holding.pnl >= 0 ? '+' : ''}{holding.pnlPercent.toFixed(1)}%
-                  </span>
+                  </div>
                 </div>
               </div>
             ))}
