@@ -1,0 +1,411 @@
+.token-hero {
+  position: relative;
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  border-radius: 24px;
+  padding: 40px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  animation: slideUp 0.5s ease-out;
+}
+
+.token-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: radial-gradient(ellipse at 50% 0%, var(--green-glow) 0%, transparent 70%);
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--green-bg);
+  border: 1px solid rgba(0, 214, 50, 0.2);
+  border-radius: 100px;
+  margin-bottom: 20px;
+  animation: slideDown 0.4s ease-out;
+}
+
+.hero-badge-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--green-primary);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.hero-badge-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.hero-main {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 24px;
+}
+
+.hero-icon {
+  font-size: 80px;
+  background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-elevated) 100%);
+  width: 120px;
+  height: 120px;
+  border-radius: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: float 4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.hero-content {
+  flex: 1;
+  padding-top: 8px;
+}
+
+.hero-theme {
+  font-size: 13px;
+  color: var(--green-primary);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.hero-name {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  letter-spacing: -1px;
+  line-height: 1.1;
+}
+
+.hero-ticker {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.hero-description {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 500px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.hero-price-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-price {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+}
+
+.hero-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 10px;
+}
+
+.hero-change.positive {
+  color: var(--green-primary);
+  background: var(--green-bg);
+}
+
+.hero-change.negative {
+  color: var(--red-primary);
+  background: var(--red-bg);
+}
+
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hero-stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.hero-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.hero-stat-value.leverage {
+  color: var(--orange-primary);
+}
+
+.hero-taxes {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 20px 24px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.tax-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 80px;
+}
+
+.tax-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tax-value {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.tax-value.buy {
+  color: var(--green-primary);
+}
+
+.tax-value.sell {
+  color: var(--red-primary);
+}
+
+.tax-arrow {
+  color: var(--text-muted);
+  font-size: 20px;
+}
+
+.tax-progress {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tax-progress-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.tax-progress-bar {
+  height: 6px;
+  background: var(--bg-elevated);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.tax-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-primary), var(--blue-primary));
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 32px;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero-btn.primary {
+  background: linear-gradient(135deg, var(--green-primary) 0%, var(--green-secondary) 100%);
+  color: #000000;
+  box-shadow: 0 8px 30px var(--green-glow);
+}
+
+.hero-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px var(--green-glow);
+}
+
+.hero-btn.primary:active {
+  transform: translateY(0);
+}
+
+.hero-btn.secondary {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-light);
+}
+
+.hero-btn.secondary:hover {
+  background: var(--border-light);
+  border-color: var(--text-muted);
+}
+
+.hero-countdown {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  text-align: right;
+  z-index: 1;
+}
+
+.countdown-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.countdown-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .hero-main {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-description {
+    text-align: center;
+  }
+
+  .hero-price-section {
+    justify-content: center;
+  }
+
+  .hero-stats {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hero-countdown {
+    position: relative;
+    top: 0;
+    right: 0;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .token-hero {
+    padding: 24px;
+    border-radius: 20px;
+  }
+
+  .hero-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 48px;
+    border-radius: 20px;
+  }
+
+  .hero-name {
+    font-size: 28px;
+  }
+
+  .hero-price {
+    font-size: 28px;
+  }
+
+  .hero-stats {
+    gap: 24px;
+  }
+
+  .hero-taxes {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .tax-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-btn {
+    width: 100%;
+  }
+}
