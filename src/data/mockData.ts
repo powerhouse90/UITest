@@ -1,6 +1,28 @@
 import type { ChartData, MemeToken, Position, SpotHolding, LeaderboardEntry, TreasuryStats, AirdropEligibility, TokenHoldingRecord, FeeDistribution, HodlerRewards } from '../types';
 
-// Today's featured meme token
+// Pre-launch state flag - set to true before first token launches
+export const isPreLaunch = true;
+
+// First token to be launched (for pre-launch state)
+export const firstToken: MemeToken = {
+  id: 'first-token',
+  name: 'First Launch',
+  ticker: '$???',
+  description: 'The first ever Pulse token. Theme will be revealed at launch.',
+  theme: '🎯 Coming Soon',
+  image: '◉',
+  price: 0,
+  priceChange24h: 0,
+  priceChangePercent24h: 0,
+  tvl: 0,
+  volume24h: 0,
+  launchTime: new Date(Date.now() + 86400000), // 1 day from now
+  buyTax: 1,
+  sellTax: 20,
+  maxLeverage: 50,
+};
+
+// Today's featured meme token (used after launch)
 export const todayToken: MemeToken = {
   id: 'pepe-trump-2026',
   name: 'Pepe Trump',
@@ -19,6 +41,25 @@ export const todayToken: MemeToken = {
   maxLeverage: 50,
   fundingRate: 0.0001,
   openInterest: 125000,
+};
+
+// Next token launching tomorrow
+export const nextToken: MemeToken = {
+  id: 'pepe-agi',
+  name: 'Pepe AGI',
+  ticker: '$PAGI',
+  description: 'Pepe becomes sentient. What could go wrong?',
+  theme: '🤖 AI Meme',
+  image: '🐸🤖',
+  price: 0,
+  priceChange24h: 0,
+  priceChangePercent24h: 0,
+  tvl: 0,
+  volume24h: 0,
+  launchTime: new Date(Date.now() + 86400000), // Tomorrow
+  buyTax: 1,
+  sellTax: 20,
+  maxLeverage: 50,
 };
 
 // Past tokens for history
@@ -60,6 +101,108 @@ export const pastTokens: MemeToken[] = [
     maxLeverage: 50,
     fundingRate: 0.0005,
     openInterest: 320000,
+  },
+  {
+    id: 'wojak-winter',
+    name: 'Wojak Winter',
+    ticker: '$WOJAK',
+    description: 'Freezing through the bear market',
+    theme: '❄️ Bear Market',
+    image: '🥶',
+    price: 0.00005,
+    priceChange24h: -0.00002,
+    priceChangePercent24h: -28.57,
+    tvl: 8500,
+    volume24h: 22000,
+    launchTime: new Date(Date.now() - 259200000),
+    buyTax: 5,
+    sellTax: 5,
+    maxLeverage: 50,
+  },
+  {
+    id: 'moon-boy',
+    name: 'Moon Boy',
+    ticker: '$MOON',
+    description: 'Wen moon? Now moon!',
+    theme: '🌙 Bull Run',
+    image: '🌕',
+    price: 0.00234,
+    priceChange24h: 0.00134,
+    priceChangePercent24h: 134.0,
+    tvl: 45000,
+    volume24h: 125000,
+    launchTime: new Date(Date.now() - 345600000),
+    buyTax: 5,
+    sellTax: 5,
+    maxLeverage: 50,
+  },
+  {
+    id: 'chad-coin',
+    name: 'Chad Coin',
+    ticker: '$CHAD',
+    description: 'Yes.',
+    theme: '💪 Gigachad',
+    image: '🗿',
+    price: 0.00156,
+    priceChange24h: 0.00056,
+    priceChangePercent24h: 56.0,
+    tvl: 32000,
+    volume24h: 78000,
+    launchTime: new Date(Date.now() - 432000000),
+    buyTax: 5,
+    sellTax: 5,
+    maxLeverage: 50,
+  },
+  {
+    id: 'bobo-tears',
+    name: 'Bobo Tears',
+    ticker: '$BOBO',
+    description: 'The pain is real',
+    theme: '😭 Emotional',
+    image: '🐻',
+    price: 0.00003,
+    priceChange24h: -0.00005,
+    priceChangePercent24h: -62.5,
+    tvl: 3200,
+    volume24h: 8900,
+    launchTime: new Date(Date.now() - 518400000),
+    buyTax: 5,
+    sellTax: 5,
+    maxLeverage: 50,
+  },
+  {
+    id: 'scheming-pepe',
+    name: 'Scheming Pepe',
+    ticker: '$SCHEME',
+    description: 'Always plotting something',
+    theme: '🧠 Big Brain',
+    image: '🐸📋',
+    price: 0.00078,
+    priceChange24h: 0.00023,
+    priceChangePercent24h: 41.8,
+    tvl: 18500,
+    volume24h: 52000,
+    launchTime: new Date(Date.now() - 604800000),
+    buyTax: 5,
+    sellTax: 5,
+    maxLeverage: 50,
+  },
+  {
+    id: 'laser-eyes',
+    name: 'Laser Eyes',
+    ticker: '$LASER',
+    description: 'Bitcoin to 100k',
+    theme: '👁️ Crypto OG',
+    image: '😎',
+    price: 0.00042,
+    priceChange24h: -0.00008,
+    priceChangePercent24h: -16.0,
+    tvl: 12000,
+    volume24h: 34000,
+    launchTime: new Date(Date.now() - 691200000),
+    buyTax: 5,
+    sellTax: 5,
+    maxLeverage: 50,
   },
 ];
 
@@ -167,7 +310,7 @@ export const mockLeaderboard: LeaderboardEntry[] = [
   {
     rank: 5,
     address: '0x1111...2222',
-    displayName: 'DiamondHands',
+    displayName: 'hodlmaster',
     pnl: 3150.75,
     trades: 23,
     winRate: 78,
@@ -216,12 +359,22 @@ export const getTimeUntilNextLaunch = (): string => {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 };
 
-// Platform treasury stats
+// Platform treasury stats (after launch)
 export const mockTreasuryStats: TreasuryStats = {
   totalBalance: 42069.50,
   tokensLaunched: 47,
   totalVolumeAllTime: 2450000,
   feesCollected: 89420.69,
+  nextLaunchSeed: 350,
+  targetForMainLaunch: 100000,
+};
+
+// Pre-launch treasury stats
+export const preLaunchTreasuryStats: TreasuryStats = {
+  totalBalance: 0,
+  tokensLaunched: 0,
+  totalVolumeAllTime: 0,
+  feesCollected: 0,
   nextLaunchSeed: 350,
   targetForMainLaunch: 100000,
 };

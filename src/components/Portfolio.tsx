@@ -1,18 +1,46 @@
 import { TrendingUp, X, Plus } from 'lucide-react';
 import type { Position, SpotHolding } from '../types';
+import { PortfolioIcon, AnalyticsIcon, LongIcon, ShortIcon, DiamondIcon, CoinsIcon } from './icons/PulseIcons';
 import './Portfolio.css';
 
 interface PortfolioProps {
   positions: Position[];
   spotHoldings: SpotHolding[];
+  isPreLaunch?: boolean;
 }
 
-export function Portfolio({ positions, spotHoldings }: PortfolioProps) {
+export function Portfolio({ positions, spotHoldings, isPreLaunch = false }: PortfolioProps) {
   const totalPositionsValue = positions.reduce((sum, p) => sum + p.margin + p.pnl, 0);
   const totalSpotValue = spotHoldings.reduce((sum, h) => sum + h.value, 0);
   const totalPnl = positions.reduce((sum, p) => sum + p.pnl, 0) + 
                    spotHoldings.reduce((sum, h) => sum + h.pnl, 0);
   const totalPnlPercent = ((totalPnl / (totalPositionsValue + totalSpotValue - totalPnl)) * 100) || 0;
+
+  if (isPreLaunch) {
+    return (
+      <div className="portfolio prelaunch">
+        <div className="portfolio-prelaunch-state">
+          <PortfolioIcon size={56} className="prelaunch-icon" />
+          <h2>Portfolio Awaiting First Launch</h2>
+          <p>Your positions and holdings will appear here once you start trading after the first token launches.</p>
+          <div className="prelaunch-features">
+            <div className="prelaunch-feature">
+              <span className="feature-bullet">•</span>
+              <span>Track leveraged perp positions up to 50x</span>
+            </div>
+            <div className="prelaunch-feature">
+              <span className="feature-bullet">•</span>
+              <span>Monitor spot token holdings</span>
+            </div>
+            <div className="prelaunch-feature">
+              <span className="feature-bullet">•</span>
+              <span>View real-time P&L across all trades</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="portfolio">
@@ -52,7 +80,7 @@ export function Portfolio({ positions, spotHoldings }: PortfolioProps) {
         
         {positions.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">📊</div>
+            <div className="empty-state-icon"><AnalyticsIcon size={40} /></div>
             <div className="empty-state-title">No Open Positions</div>
             <div className="empty-state-text">Start trading to see your positions here</div>
             <button className="empty-state-btn">
@@ -67,7 +95,7 @@ export function Portfolio({ positions, spotHoldings }: PortfolioProps) {
                 <div className="position-header">
                   <div className="position-info">
                     <div className="position-icon">
-                      {position.type === 'long' ? '📈' : '📉'}
+                      {position.type === 'long' ? <LongIcon size={20} /> : <ShortIcon size={20} />}
                     </div>
                     <div className="position-details">
                       <span className="position-name">{position.tokenTicker}</span>
@@ -128,7 +156,8 @@ export function Portfolio({ positions, spotHoldings }: PortfolioProps) {
       <div className="portfolio-section">
         <div className="section-header">
           <h3 className="section-title">
-            💰 Spot Holdings
+            <CoinsIcon size={18} />
+            Spot Holdings
             <span className="section-badge">{spotHoldings.length}</span>
           </h3>
           <button className="section-action">View All</button>
@@ -136,7 +165,7 @@ export function Portfolio({ positions, spotHoldings }: PortfolioProps) {
         
         {spotHoldings.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">💎</div>
+            <div className="empty-state-icon"><DiamondIcon size={40} /></div>
             <div className="empty-state-title">No Spot Holdings</div>
             <div className="empty-state-text">Buy some tokens to see them here</div>
             <button className="empty-state-btn">

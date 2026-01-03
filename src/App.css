@@ -161,6 +161,10 @@
   align-items: start;
 }
 
+.trade-view.prelaunch {
+  display: block;
+}
+
 .trade-left {
   min-width: 0;
 }
@@ -189,6 +193,39 @@
 
 .trade-right::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* Pre-launch trade message */
+.prelaunch-trade-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 24px;
+  min-height: 400px;
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+}
+
+.prelaunch-trade-message .prelaunch-message-icon {
+  margin-bottom: 24px;
+}
+
+.prelaunch-trade-message h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+}
+
+.prelaunch-trade-message p {
+  font-size: 15px;
+  color: #a0a0a0;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 400px;
 }
 
 /* Portfolio View */
@@ -427,4 +464,37 @@
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Pre-launch Trade View */
+.prelaunch-trade-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 80px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  min-height: 400px;
+}
+
+.prelaunch-message-icon {
+  font-size: 64px;
+  margin-bottom: 24px;
+}
+
+.prelaunch-trade-message h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.prelaunch-trade-message p {
+  color: var(--text-muted);
+  font-size: 15px;
+  max-width: 400px;
+  margin: 0;
 }

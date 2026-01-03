@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, TrendingUp, TrendingDown, Zap, Diamond, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, TrendingUp, TrendingDown, Zap, Award, Info, ChevronDown, ChevronUp, Diamond } from 'lucide-react';
 import type { MemeToken } from '../types';
 import { getTimeUntilNextLaunch, mockTreasuryStats } from '../data/mockData';
 import './TokenHero.css';
@@ -114,12 +114,12 @@ export function TokenHero({ token, onTrade }: TokenHeroProps) {
         </div>
       </div>
 
-      {/* HODLer incentive banner */}
+      {/* Holder incentive banner */}
       <div className="hodler-banner">
-        <Diamond size={16} className="banner-icon" />
+        <Award size={16} className="banner-icon" />
         <div className="banner-content">
-          <span className="banner-title">Diamond Hands Bonus</span>
-          <span className="banner-text">Buy & HODL to earn fee redistribution + airdrop eligibility</span>
+          <span className="banner-title">Holder Bonus</span>
+          <span className="banner-text">Buy & hold to earn fee redistribution + airdrop eligibility</span>
         </div>
       </div>
 
