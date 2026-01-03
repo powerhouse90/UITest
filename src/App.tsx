@@ -100,7 +100,7 @@ function App() {
                   <StockChart data={chartData} token={selectedToken} />
                 </div>
                 <div className="trade-right">
-                  <TradingPanel token={selectedToken} />
+                  <TradingPanel token={selectedToken} positions={mockPositions} />
                 </div>
               </>
             )}

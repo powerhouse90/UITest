@@ -39,6 +39,8 @@ export const todayToken: MemeToken = {
   buyTax: 1.8,
   sellTax: 17.2,
   maxLeverage: 50,
+  fundingRate: 0.0001,
+  openInterest: 125000,
 };
 
 // Next token launching tomorrow
@@ -78,6 +80,8 @@ export const pastTokens: MemeToken[] = [
     buyTax: 5,
     sellTax: 5,
     maxLeverage: 50,
+    fundingRate: -0.0002,
+    openInterest: 85000,
   },
   {
     id: 'cat-wif-hat',
@@ -95,6 +99,8 @@ export const pastTokens: MemeToken[] = [
     buyTax: 5,
     sellTax: 5,
     maxLeverage: 50,
+    fundingRate: 0.0005,
+    openInterest: 320000,
   },
   {
     id: 'wojak-winter',

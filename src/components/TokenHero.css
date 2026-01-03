@@ -106,9 +106,28 @@
 .hero-description {
   font-size: 15px;
   color: var(--text-secondary);
-  max-width: 500px;
   line-height: 1.6;
   margin: 0;
+}
+
+.hero-description-container {
+  max-width: 500px;
+}
+
+.description-toggle {
+  background: transparent;
+  border: none;
+  color: var(--green-primary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.description-toggle:hover {
+  opacity: 0.8;
+  text-decoration: underline;
 }
 
 .hero-price-section {

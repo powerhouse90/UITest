@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, TrendingUp, TrendingDown, Zap, Award, Info } from 'lucide-react';
+import { Clock, TrendingUp, TrendingDown, Zap, Award, Info, ChevronDown, ChevronUp, Diamond } from 'lucide-react';
 import type { MemeToken } from '../types';
 import { getTimeUntilNextLaunch, mockTreasuryStats } from '../data/mockData';
 import './TokenHero.css';
@@ -11,8 +11,14 @@ interface TokenHeroProps {
 
 export function TokenHero({ token, onTrade }: TokenHeroProps) {
   const [countdown, setCountdown] = useState(getTimeUntilNextLaunch());
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
   const isPositive = token.priceChangePercent24h >= 0;
   const tvlProgress = Math.min((token.tvl / 10000) * 100, 100);
+
+  const shouldTruncate = token.description.length > 120;
+  const displayDescription = isDescExpanded || !shouldTruncate 
+    ? token.description 
+    : `${token.description.slice(0, 120)}...`;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -39,7 +45,17 @@ export function TokenHero({ token, onTrade }: TokenHeroProps) {
           <div className="hero-theme">{token.theme}</div>
           <h1 className="hero-name">{token.name}</h1>
           <div className="hero-ticker">{token.ticker}</div>
-          <p className="hero-description">{token.description}</p>
+          <div className="hero-description-container">
+            <p className="hero-description">{displayDescription}</p>
+            {shouldTruncate && (
+              <button 
+                className="description-toggle"
+                onClick={() => setIsDescExpanded(!isDescExpanded)}
+              >
+                {isDescExpanded ? 'Read Less' : 'Read More'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

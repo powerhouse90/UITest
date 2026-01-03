@@ -172,6 +172,27 @@
 .trade-right {
   position: sticky;
   top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding-right: 4px; /* Space for potential scrollbar */
+}
+
+/* Custom scrollbar for sticky panel */
+.trade-right::-webkit-scrollbar {
+  width: 4px;
+}
+
+.trade-right::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.trade-right::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.trade-right::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* Pre-launch trade message */
