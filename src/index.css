@@ -371,7 +371,7 @@ img {
 
 /* ===== Pulse Logo Animations ===== */
 .pulse-logo {
-  /* Clean logo without extra effects */
+  display: block;
 }
 
 .pulse-ring-outer {

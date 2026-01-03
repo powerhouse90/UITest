@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell } from 'lucide-react';
-import { firstToken, mockTreasuryStats } from '../data/mockData';
-import { PulseIcon, RocketIcon } from './icons/PulseIcons';
+import { firstToken } from '../data/mockData';
 import './PreLaunchHero.css';
 
 interface PreLaunchHeroProps {
@@ -9,8 +7,9 @@ interface PreLaunchHeroProps {
 }
 
 export function PreLaunchHero({ onNotify }: PreLaunchHeroProps) {
-  const [countdown, setCountdown] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [notified, setNotified] = useState(false);
+  const [waitlistCount] = useState(2847);
 
   useEffect(() => {
     const updateCountdown = () => {
@@ -18,15 +17,16 @@ export function PreLaunchHero({ onNotify }: PreLaunchHeroProps) {
       const diff = firstToken.launchTime.getTime() - now.getTime();
       
       if (diff <= 0) {
-        setCountdown({ hours: 0, minutes: 0, seconds: 0 });
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
         return;
       }
 
-      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
       const minutes = Math.floor((diff % 3600000) / 60000);
       const seconds = Math.floor((diff % 60000) / 1000);
       
-      setCountdown({ hours, minutes, seconds });
+      setCountdown({ days, hours, minutes, seconds });
     };
 
     updateCountdown();
@@ -40,101 +40,188 @@ export function PreLaunchHero({ onNotify }: PreLaunchHeroProps) {
   };
 
   return (
-    <div className="prelaunch-hero">
-      <div className="prelaunch-badge">
-        <RocketIcon size={16} />
-        <span>LAUNCHING SOON</span>
-      </div>
-
-      <PulseIcon size={80} className="prelaunch-main-icon" />
-      
-      <h1 className="prelaunch-title">First Token Drops In</h1>
-      
-      <div className="countdown-display">
-        <div className="countdown-block">
-          <span className="countdown-number">{String(countdown.hours).padStart(2, '0')}</span>
-          <span className="countdown-label">Hours</span>
-        </div>
-        <span className="countdown-separator">:</span>
-        <div className="countdown-block">
-          <span className="countdown-number">{String(countdown.minutes).padStart(2, '0')}</span>
-          <span className="countdown-label">Minutes</span>
-        </div>
-        <span className="countdown-separator">:</span>
-        <div className="countdown-block">
-          <span className="countdown-number">{String(countdown.seconds).padStart(2, '0')}</span>
-          <span className="countdown-label">Seconds</span>
+    <div className="hero">
+      <div className="hero-bg">
+        {/* Main gradient orbs */}
+        <div className="gradient-orb orb-1"></div>
+        <div className="gradient-orb orb-2"></div>
+        <div className="gradient-orb orb-3"></div>
+        <div className="gradient-orb orb-4"></div>
+        <div className="gradient-orb orb-5"></div>
+        <div className="gradient-orb orb-6"></div>
+        
+        {/* Floating elements */}
+        <div className="floating-elements">
+          <span className="float-item float-1">🚀</span>
+          <span className="float-item float-2">💎</span>
+          <span className="float-item float-3">$$$</span>
+          <span className="float-item float-4">🌙</span>
+          <span className="float-item float-5">100x</span>
+          <span className="float-item float-6">📈</span>
+          <span className="float-item float-7">🔥</span>
+          <span className="float-item float-8">+420%</span>
+          <span className="float-item float-9">💰</span>
+          <span className="float-item float-10">🦍</span>
         </div>
       </div>
 
-      <p className="prelaunch-description">
-        A new meme token launches every day at 00:00 UTC. Be ready to trade spot or perps with up to 50x leverage.
-      </p>
+      <div className="hero-content">
+        {/* Badge */}
+        <div className="live-badge">
+          <div className="live-pulse"></div>
+          <span>GENESIS DROP</span>
+        </div>
 
-      <div className="prelaunch-stats">
-        <div className="prelaunch-stat">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M9 2L11 7H16L12 10.5L13.5 16L9 12.5L4.5 16L6 10.5L2 7H7L9 2Z" fill="#00c805"/>
-          </svg>
-          <div className="stat-content">
-            <span className="stat-value">50x</span>
-            <span className="stat-label">Max Leverage</span>
+        {/* Main headline */}
+        <h1 className="hero-title">
+          <span className="title-line-1">Trade Memes.</span>
+          <span className="title-line-2">Stack Profits.</span>
+          <span className="title-line-3">Every. Single. Day.</span>
+        </h1>
+
+        {/* Value props */}
+        <div className="value-props">
+          <div className="value-prop">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 1L12.5 6.5L18 7.5L14 11.5L15 17L10 14.5L5 17L6 11.5L2 7.5L7.5 6.5L10 1Z" fill="currentColor"/>
+            </svg>
+            <span>New token every 24h</span>
+          </div>
+          <div className="value-prop">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 1L12.5 6.5L18 7.5L14 11.5L15 17L10 14.5L5 17L6 11.5L2 7.5L7.5 6.5L10 1Z" fill="currentColor"/>
+            </svg>
+            <span>50x leverage perps</span>
+          </div>
+          <div className="value-prop highlight">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 1L12.5 6.5L18 7.5L14 11.5L15 17L10 14.5L5 17L6 11.5L2 7.5L7.5 6.5L10 1Z" fill="currentColor"/>
+            </svg>
+            <span>Holders earn 40% of fees</span>
           </div>
         </div>
-        <div className="prelaunch-stat">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M2 14L6 10L10 12L16 4" stroke="#00c805" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M12 4H16V8" stroke="#00c805" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <div className="stat-content">
-            <span className="stat-value">${mockTreasuryStats.nextLaunchSeed}</span>
-            <span className="stat-label">Initial Seed</span>
+
+        {/* Countdown */}
+        <div className="countdown-section">
+          <div className="countdown-header">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M8 4V8L11 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <span>Genesis token drops in</span>
+          </div>
+          <div className="countdown-grid">
+            <div className="countdown-item">
+              <div className="countdown-value">{String(countdown.days).padStart(2, '0')}</div>
+              <div className="countdown-label">Days</div>
+            </div>
+            <span className="countdown-sep">:</span>
+            <div className="countdown-item">
+              <div className="countdown-value">{String(countdown.hours).padStart(2, '0')}</div>
+              <div className="countdown-label">Hours</div>
+            </div>
+            <span className="countdown-sep">:</span>
+            <div className="countdown-item">
+              <div className="countdown-value">{String(countdown.minutes).padStart(2, '0')}</div>
+              <div className="countdown-label">Mins</div>
+            </div>
+            <span className="countdown-sep">:</span>
+            <div className="countdown-item highlight">
+              <div className="countdown-value">{String(countdown.seconds).padStart(2, '0')}</div>
+              <div className="countdown-label">Secs</div>
+            </div>
           </div>
         </div>
-        <div className="prelaunch-stat">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <rect x="2" y="8" width="14" height="8" rx="2" stroke="#00c805" strokeWidth="1.5" fill="none"/>
-            <path d="M5 8V5C5 2.79 6.79 1 9 1C11.21 1 13 2.79 13 5V8" stroke="#00c805" strokeWidth="1.5" fill="none"/>
-          </svg>
-          <div className="stat-content">
-            <span className="stat-value">1% / 20%</span>
-            <span className="stat-label">Buy / Sell Tax</span>
+
+        {/* CTA */}
+        <div className="cta-section">
+          <button 
+            className={`cta-main ${notified ? 'success' : ''}`}
+            onClick={handleNotify}
+            disabled={notified}
+          >
+            <span className="cta-bg"></span>
+            <span className="cta-content">
+              {notified ? (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M4 10L8 14L16 6" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>You're on the list!</span>
+                </>
+              ) : (
+                <>
+                  <span>Join Waitlist</span>
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M4 10H16M16 10L11 5M16 10L11 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </>
+              )}
+            </span>
+          </button>
+          
+          {/* Social proof */}
+          <div className="social-proof">
+            <div className="avatar-stack">
+              <div className="avatar"></div>
+              <div className="avatar"></div>
+              <div className="avatar"></div>
+              <div className="avatar"></div>
+              <div className="avatar"></div>
+            </div>
+            <span className="proof-text">
+              <strong>{waitlistCount.toLocaleString()}+</strong> degens already waiting
+            </span>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="stats-row">
+          <div className="stat-card">
+            <span className="stat-value green">1%</span>
+            <span className="stat-label">Entry</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-value orange">20%</span>
+            <span className="stat-label">Exit Tax</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-value purple">50x</span>
+            <span className="stat-label">Leverage</span>
+          </div>
+          <div className="stat-card gold-card">
+            <span className="stat-value gold">40%</span>
+            <span className="stat-label">Fee Share</span>
+          </div>
+        </div>
+
+        {/* Trust */}
+        <div className="trust-bar">
+          <div className="trust-item">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1L13 4V6.5C13 10.1 10.4 13.4 7 14C3.6 13.4 1 10.1 1 6.5V4L7 1Z" stroke="currentColor" strokeWidth="1.2"/>
+              <path d="M4 7L6 9L10 5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span>On-Chain</span>
+          </div>
+          <div className="trust-divider"></div>
+          <div className="trust-item">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="2" y="4" width="10" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.2"/>
+              <path d="M4.5 4V3C4.5 1.9 5.4 1 6.5 1H7.5C8.6 1 9.5 1.9 9.5 3V4" stroke="currentColor" strokeWidth="1.2"/>
+            </svg>
+            <span>Non-Custodial</span>
+          </div>
+          <div className="trust-divider"></div>
+          <div className="trust-item">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.2"/>
+              <path d="M7 3V7L9.5 8.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+            <span>Base L2</span>
           </div>
         </div>
       </div>
-
-      <div className="prelaunch-features">
-        <div className="feature-item">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="8" cy="6" r="3" stroke="#00c805" strokeWidth="1.5" fill="none"/>
-            <path d="M3 14C3 11.24 5.24 9 8 9C10.76 9 13 11.24 13 14" stroke="#00c805" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          <span>Holders earn 40% of all trading fees</span>
-        </div>
-        <div className="feature-item">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <rect x="2" y="3" width="12" height="10" rx="1" stroke="#00c805" strokeWidth="1.5" fill="none"/>
-            <circle cx="8" cy="8" r="2" fill="#00c805"/>
-          </svg>
-          <span>Daily snapshots track airdrop eligibility</span>
-        </div>
-        <div className="feature-item">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="8" cy="8" r="6" stroke="#00c805" strokeWidth="1.5" fill="none"/>
-            <path d="M8 4V8L11 10" stroke="#00c805" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
-          <span>New token every day at 00:00 UTC</span>
-        </div>
-      </div>
-
-      <button 
-        className={`notify-btn ${notified ? 'notified' : ''}`}
-        onClick={handleNotify}
-        disabled={notified}
-      >
-        <Bell size={18} />
-        <span>{notified ? 'Reminder Set!' : 'Notify Me at Launch'}</span>
-      </button>
     </div>
   );
 }
