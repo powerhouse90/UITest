@@ -47,7 +47,7 @@ function App() {
               <StockChart data={chartData} token={todayToken} />
             </div>
             <div className="trade-right">
-              <TradingPanel token={todayToken} />
+              <TradingPanel token={todayToken} positions={mockPositions} />
             </div>
           </div>
         )}

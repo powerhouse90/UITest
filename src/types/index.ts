@@ -56,6 +56,8 @@ export interface MemeToken {
   buyTax: number;
   sellTax: number;
   maxLeverage: number;
+  fundingRate?: number;
+  openInterest?: number;
 }
 
 export interface Position {
