@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, AlertTriangle, Zap, Info, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertTriangle, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import type { MemeToken, Position } from '../types';
 import './TradingPanel.css';
 
@@ -36,7 +36,6 @@ export function TradingPanel({ token, positions = [] }: TradingPanelProps) {
     ? token.price * (1 - 0.9 / leverage)
     : token.price * (1 + 0.9 / leverage);
   
-  const marginRatio = amountNum > 0 ? (1 / leverage) * 100 : 0;
   const fundingRate = token.fundingRate || 0.0001;
 
   return (
@@ -45,7 +44,7 @@ export function TradingPanel({ token, positions = [] }: TradingPanelProps) {
       <div className="panel-header">
         <div className="panel-title">
           <Zap size={18} className="panel-icon" />
-          <span>{mode === 'spot' ? 'Spot Trade' : 'Perps Trading'}</span>
+          <span>{mode === 'spot' ? 'Spot' : 'Perps'}</span>
         </div>
         <div className="panel-tabs">
           <button 
@@ -65,7 +64,7 @@ export function TradingPanel({ token, positions = [] }: TradingPanelProps) {
 
       <div className="panel-content">
         {activeTab === 'trade' ? (
-          <>
+          <div className="trade-content">
             {/* Mode Toggle */}
             <div className="mode-toggle">
               <button 
@@ -78,101 +77,181 @@ export function TradingPanel({ token, positions = [] }: TradingPanelProps) {
                 className={`mode-btn ${mode === 'perps' ? 'active' : ''}`}
                 onClick={() => setMode('perps')}
               >
-                <span>Perps</span>
-                <span className="mode-badge">50x</span>
+                Perps
               </button>
             </div>
 
-            {/* Order Type Toggle (Perps only) */}
-            {mode === 'perps' && (
-              <div className="order-type-toggle">
-                <button 
-                  className={`order-type-btn ${orderType === 'market' ? 'active' : ''}`}
-                  onClick={() => setOrderType('market')}
-                >
-                  Market
-                </button>
-                <button 
-                  className={`order-type-btn ${orderType === 'limit' ? 'active' : ''}`}
-                  onClick={() => setOrderType('limit')}
-                >
-                  Limit
-                </button>
-              </div>
-            )}
-
-            {/* Direction Toggle */}
-            <div className="direction-toggle">
-              <button 
-                className={`direction-btn buy ${direction === 'buy' ? 'active' : ''}`}
-                onClick={() => setDirection('buy')}
-              >
-                <TrendingUp size={18} />
-                {mode === 'spot' ? 'Buy' : 'Long'}
-              </button>
-              <button 
-                className={`direction-btn sell ${direction === 'sell' ? 'active' : ''}`}
-                onClick={() => setDirection('sell')}
-              >
-                <TrendingDown size={18} />
-                {mode === 'spot' ? 'Sell' : 'Short'}
-              </button>
-            </div>
-
-            {/* Limit Price Input */}
-            {mode === 'perps' && orderType === 'limit' && (
-              <div className="input-group">
-                <label className="input-label">Limit Price</label>
-                <div className="input-wrapper">
-                  <span className="input-prefix">$</span>
-                  <input
-                    type="number"
-                    className="amount-input"
-                    value={limitPrice}
-                    onChange={(e) => setLimitPrice(e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Amount Input */}
-            <div className="input-group">
-              <label className="input-label">
-                <span>{mode === 'spot' ? (isLong ? 'You Pay' : 'You Sell') : 'Margin (USDC)'}</span>
-                <span className="input-balance">Balance: $1,234.56</span>
-              </label>
-              <div className="input-wrapper">
-                <span className="input-prefix">$</span>
-                <input
-                  type="number"
-                  className="amount-input"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                />
-                <button className="max-btn">MAX</button>
-              </div>
-              <div className="quick-amounts">
-                {['25', '50', '100', '250'].map(val => (
+            {/* SPOT MODE */}
+            {mode === 'spot' && (
+              <div className="spot-content">
+                <div className="direction-toggle">
                   <button 
-                    key={val} 
-                    className={`quick-amount-btn ${amount === val ? 'active' : ''}`}
-                    onClick={() => setAmount(val)}
+                    className={`direction-btn buy ${direction === 'buy' ? 'active' : ''}`}
+                    onClick={() => setDirection('buy')}
                   >
-                    ${val}
+                    <TrendingUp size={18} />
+                    Buy
                   </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Leverage Slider (Perps only) */}
-            {mode === 'perps' && (
-              <div className="leverage-section">
-                <div className="leverage-header">
-                  <span className="leverage-label">Leverage</span>
-                  <span className="leverage-value">{leverage}x</span>
+                  <button 
+                    className={`direction-btn sell ${direction === 'sell' ? 'active' : ''}`}
+                    onClick={() => setDirection('sell')}
+                  >
+                    <TrendingDown size={18} />
+                    Sell
+                  </button>
                 </div>
-                <div className="leverage-slider-container">
+
+                <div className="input-group">
+                  <label className="input-label">
+                    <span>{isLong ? 'You Pay' : 'You Sell'}</span>
+                    <span className="input-balance">Balance: $1,234.56</span>
+                  </label>
+                  <div className="input-wrapper">
+                    <span className="input-prefix">$</span>
+                    <input
+                      type="number"
+                      className="amount-input"
+                      placeholder="0.00"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                    />
+                    <button className="max-btn">MAX</button>
+                  </div>
+                  <div className="quick-amounts">
+                    {['25', '50', '100', '250'].map(val => (
+                      <button 
+                        key={val} 
+                        className={`quick-amount-btn ${amount === val ? 'active' : ''}`}
+                        onClick={() => setAmount(val)}
+                      >
+                        ${val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={`order-summary ${!isSummaryExpanded ? 'collapsed' : ''}`}>
+                  <button 
+                    className="summary-toggle"
+                    onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+                  >
+                    <span>Summary</span>
+                    {isSummaryExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </button>
+                  
+                  {isSummaryExpanded && (
+                    <div className="summary-content">
+                      <div className="summary-row">
+                        <span>Price</span>
+                        <span>${token.price.toFixed(8)}</span>
+                      </div>
+                      <div className="summary-row">
+                        <span>{isLong ? 'Buy' : 'Sell'} Tax</span>
+                        <span className={taxRate > 5 ? 'warning' : ''}>{taxRate.toFixed(1)}%</span>
+                      </div>
+                      <div className="summary-row">
+                        <span>You Receive</span>
+                        <span className="positive">
+                          {isLong 
+                            ? `${tokensReceived.toLocaleString(undefined, {maximumFractionDigits: 0})} ${token.ticker}`
+                            : `$${tokensReceived.toFixed(2)}`
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <button className={`submit-btn ${direction}`} disabled={!amountNum}>
+                  {isLong ? `Buy ${token.ticker}` : `Sell ${token.ticker}`}
+                </button>
+              </div>
+            )}
+
+            {/* PERPS MODE */}
+            {mode === 'perps' && (
+              <div className="perps-content">
+                <div className="order-type-toggle">
+                  <button 
+                    className={`order-type-btn ${orderType === 'market' ? 'active' : ''}`}
+                    onClick={() => setOrderType('market')}
+                  >
+                    Market
+                  </button>
+                  <button 
+                    className={`order-type-btn ${orderType === 'limit' ? 'active' : ''}`}
+                    onClick={() => setOrderType('limit')}
+                  >
+                    Limit
+                  </button>
+                </div>
+
+                <div className="direction-toggle">
+                  <button 
+                    className={`direction-btn buy ${direction === 'buy' ? 'active' : ''}`}
+                    onClick={() => setDirection('buy')}
+                  >
+                    <TrendingUp size={18} />
+                    Long
+                  </button>
+                  <button 
+                    className={`direction-btn sell ${direction === 'sell' ? 'active' : ''}`}
+                    onClick={() => setDirection('sell')}
+                  >
+                    <TrendingDown size={18} />
+                    Short
+                  </button>
+                </div>
+
+                {orderType === 'limit' && (
+                  <div className="input-group">
+                    <label className="input-label">Limit Price</label>
+                    <div className="input-wrapper">
+                      <span className="input-prefix">$</span>
+                      <input
+                        type="number"
+                        className="amount-input"
+                        value={limitPrice}
+                        onChange={(e) => setLimitPrice(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="input-group">
+                  <label className="input-label">
+                    <span>Margin</span>
+                    <span className="input-balance">Balance: $1,234.56</span>
+                  </label>
+                  <div className="input-wrapper">
+                    <span className="input-prefix">$</span>
+                    <input
+                      type="number"
+                      className="amount-input"
+                      placeholder="0.00"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                    />
+                    <button className="max-btn">MAX</button>
+                  </div>
+                  <div className="quick-amounts">
+                    {['25', '50', '100', '250'].map(val => (
+                      <button 
+                        key={val} 
+                        className={`quick-amount-btn ${amount === val ? 'active' : ''}`}
+                        onClick={() => setAmount(val)}
+                      >
+                        ${val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="leverage-section">
+                  <div className="leverage-header">
+                    <span className="leverage-label">Leverage</span>
+                    <span className="leverage-value">{leverage}x</span>
+                  </div>
                   <input
                     type="range"
                     min="1"
@@ -181,157 +260,98 @@ export function TradingPanel({ token, positions = [] }: TradingPanelProps) {
                     onChange={(e) => setLeverage(parseInt(e.target.value))}
                     className="leverage-slider"
                   />
-                </div>
-                <div className="leverage-presets">
-                  {[5, 10, 25, 50].map(val => (
-                    <button 
-                      key={val}
-                      className={`leverage-preset ${leverage === val ? 'active' : ''}`}
-                      onClick={() => setLeverage(val)}
-                    >
-                      {val}x
-                    </button>
-                  ))}
-                </div>
-
-                {/* Margin Ratio Bar */}
-                <div className="margin-ratio-container">
-                  <div className="margin-ratio-header">
-                    <span className="margin-ratio-label">Margin Usage</span>
-                    <span className={`margin-ratio-value ${leverage > 25 ? 'danger' : leverage > 10 ? 'warning' : ''}`}>
-                      {leverage.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="margin-ratio-bar-bg">
-                    <div 
-                      className={`margin-ratio-bar-fill ${leverage > 25 ? 'danger' : leverage > 10 ? 'warning' : ''}`}
-                      style={{ width: `${(leverage / 50) * 100}%` }}
-                    />
+                  <div className="leverage-presets">
+                    {[5, 10, 25, 50].map(val => (
+                      <button 
+                        key={val}
+                        className={`leverage-preset ${leverage === val ? 'active' : ''}`}
+                        onClick={() => setLeverage(val)}
+                      >
+                        {val}x
+                      </button>
+                    ))}
                   </div>
                 </div>
-              </div>
-            )}
 
-            {/* Order Summary */}
-            <div className={`order-summary ${!isSummaryExpanded ? 'collapsed' : ''}`}>
-              <button 
-                className="summary-toggle"
-                onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
-              >
-                <span>Order Summary</span>
-                {isSummaryExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </button>
-              
-              {isSummaryExpanded && (
-                <div className="summary-content">
-                  {mode === 'spot' ? (
-                    <>
+                <div className={`order-summary ${!isSummaryExpanded ? 'collapsed' : ''}`}>
+                  <button 
+                    className="summary-toggle"
+                    onClick={() => setIsSummaryExpanded(!isSummaryExpanded)}
+                  >
+                    <span>Summary</span>
+                    {isSummaryExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </button>
+                  
+                  {isSummaryExpanded && (
+                    <div className="summary-content">
                       <div className="summary-row">
-                        <span className="summary-label">Price</span>
-                        <span className="summary-value">${token.price.toFixed(8)}</span>
+                        <span>Position Size</span>
+                        <span>${positionSize.toLocaleString()}</span>
                       </div>
                       <div className="summary-row">
-                        <span className="summary-label">{isLong ? 'Buy' : 'Sell'} Tax</span>
-                        <span className={`summary-value ${taxRate > 5 ? 'warning' : ''}`}>
-                          {taxRate.toFixed(1)}%
+                        <span>Liq. Price</span>
+                        <span className="danger">${liquidationPrice.toFixed(8)}</span>
+                      </div>
+                      <div className="summary-row">
+                        <span>Funding</span>
+                        <span className={fundingRate > 0 ? 'negative' : 'positive'}>
+                          {(fundingRate * 100).toFixed(4)}%/h
                         </span>
                       </div>
-                      <div className="summary-row">
-                        <span className="summary-label">You Receive</span>
-                        <span className="summary-value positive">
-                          {isLong 
-                            ? `${tokensReceived.toLocaleString(undefined, {maximumFractionDigits: 0})} ${token.ticker}`
-                            : `$${tokensReceived.toFixed(2)}`
-                          }
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="summary-row">
-                        <span className="summary-label">Position Size</span>
-                        <span className="summary-value">${positionSize.toLocaleString()}</span>
-                      </div>
-                      <div className="summary-row">
-                        <span className="summary-label">Liq. Price</span>
-                        <span className="summary-value danger">${liquidationPrice.toFixed(8)}</span>
-                      </div>
-                      <div className="summary-row">
-                        <span className="summary-label">Funding Rate</span>
-                        <span className={`summary-value ${fundingRate > 0 ? 'negative' : 'positive'}`}>
-                          {(fundingRate * 100).toFixed(4)}% / 1h
-                        </span>
-                      </div>
-                      <div className="summary-row">
-                        <span className="summary-label">Open Interest</span>
-                        <span className="summary-value">
-                          ${(token.openInterest || 0).toLocaleString()}
-                        </span>
-                      </div>
-                    </>
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
 
-            {/* Submit Button */}
-            <button className={`submit-btn ${direction}`} disabled={!amountNum}>
-              {mode === 'spot' 
-                ? (isLong ? `Buy ${token.ticker}` : `Sell ${token.ticker}`)
-                : `Open ${direction === 'buy' ? 'Long' : 'Short'}`
-              }
-            </button>
+                <button className={`submit-btn ${direction}`} disabled={!amountNum}>
+                  Open {direction === 'buy' ? 'Long' : 'Short'}
+                </button>
 
-            {/* Risk Warning for Perps (Conditional) */}
-            {mode === 'perps' && leverage >= 20 && (
-              <div className="risk-warning">
-                <AlertTriangle size={16} />
-                <span className="risk-warning-text">
-                  <strong>High Leverage ({leverage}x):</strong> Significant risk of liquidation.
-                </span>
+                {leverage >= 20 && (
+                  <div className="risk-warning">
+                    <AlertTriangle size={16} />
+                    <span>High leverage risk</span>
+                  </div>
+                )}
               </div>
             )}
-          </>
+          </div>
         ) : (
-          <div className="positions-mini-list">
+          <div className="positions-list">
             {tokenPositions.length > 0 ? (
               tokenPositions.map(pos => (
-                <div key={pos.id} className="position-mini-card">
-                  <div className="pos-mini-header">
-                    <div className="pos-mini-info">
-                      <span className={`pos-mini-badge ${pos.type}`}>{pos.type.toUpperCase()} {pos.leverage}x</span>
-                      <span className="pos-mini-ticker">{pos.tokenTicker}</span>
-                    </div>
-                    <div className={`pos-mini-pnl ${pos.pnl >= 0 ? 'positive' : 'negative'}`}>
+                <div key={pos.id} className="position-card">
+                  <div className="pos-header">
+                    <span className={`pos-badge ${pos.type}`}>
+                      {pos.type.toUpperCase()} {pos.leverage}x
+                    </span>
+                    <span className={`pos-pnl ${pos.pnl >= 0 ? 'positive' : 'negative'}`}>
                       {pos.pnl >= 0 ? '+' : ''}${pos.pnl.toFixed(2)}
-                    </div>
+                    </span>
                   </div>
-                  <div className="pos-mini-stats">
-                    <div className="pos-mini-stat">
+                  <div className="pos-stats">
+                    <div className="pos-stat">
                       <span>Size</span>
                       <span>${pos.size.toFixed(2)}</span>
                     </div>
-                    <div className="pos-mini-stat">
+                    <div className="pos-stat">
                       <span>Entry</span>
                       <span>${pos.entryPrice.toFixed(8)}</span>
                     </div>
-                    <div className="pos-mini-stat">
+                    <div className="pos-stat">
                       <span>Liq.</span>
                       <span className="danger">${pos.liquidationPrice.toFixed(8)}</span>
                     </div>
                   </div>
-                  <div className="pos-mini-actions">
-                    <button className="pos-mini-btn close">Close</button>
-                    <button className="pos-mini-btn add">Add Margin</button>
+                  <div className="pos-actions">
+                    <button className="pos-btn close">Close</button>
+                    <button className="pos-btn add">+ Margin</button>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="empty-state mini">
-                <div className="empty-state-text">No active {token.ticker} positions</div>
-                <button className="empty-state-btn mini" onClick={() => setActiveTab('trade')}>
-                  Trade Now
-                </button>
+              <div className="empty-positions">
+                <p>No active positions</p>
+                <button onClick={() => setActiveTab('trade')}>Start Trading</button>
               </div>
             )}
           </div>

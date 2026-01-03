@@ -29,6 +29,29 @@ export function TokenHero({ token, onTrade }: TokenHeroProps) {
 
   return (
     <div className="token-hero">
+      {/* Animated background */}
+      <div className="hero-bg">
+        <div className="gradient-orb orb-1"></div>
+        <div className="gradient-orb orb-2"></div>
+        <div className="gradient-orb orb-3"></div>
+        <div className="gradient-orb orb-4"></div>
+        <div className="gradient-orb orb-5"></div>
+        <div className="gradient-orb orb-6"></div>
+        
+        <div className="floating-elements">
+          <span className="float-item float-1">🚀</span>
+          <span className="float-item float-2">💎</span>
+          <span className="float-item float-3">$$$</span>
+          <span className="float-item float-4">🌙</span>
+          <span className="float-item float-5">100x</span>
+          <span className="float-item float-6">📈</span>
+          <span className="float-item float-7">🔥</span>
+          <span className="float-item float-8">+420%</span>
+          <span className="float-item float-9">💰</span>
+          <span className="float-item float-10">🦍</span>
+        </div>
+      </div>
+
       {/* Countdown - top right */}
       <div className="hero-countdown">
         <div className="countdown-label">Next token in</div>

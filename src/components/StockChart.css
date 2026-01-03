@@ -110,10 +110,41 @@
   color: var(--text-primary);
 }
 
+/* Chart wrapper for overlay */
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.chart-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .chart-container {
   width: 100%;
-  height: 350px;
+  height: 100%;
   margin: 0;
+}
+
+/* TAP GRID OVERLAY - Covers future area (right 75% of chart) */
+.tap-grid-overlay {
+  position: absolute;
+  top: 10px;
+  left: 25%; /* Starts at NOW line */
+  right: 50px;
+  bottom: 35px;
+  display: grid;
+  grid-template-rows: repeat(8, 1fr);
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  z-index: 10;
 }
 
 .chart-stats {
@@ -151,6 +182,329 @@
   color: var(--red-primary);
 }
 
+/* Chart Controls */
+.chart-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.chart-mode-btns {
+  display: flex;
+  gap: 8px;
+}
+
+/* LIVE MODE BUTTON */
+.live-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.live-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.live-mode-btn.active {
+  background: rgba(255, 50, 50, 0.15);
+  border-color: #ff4444;
+  color: #ff4444;
+}
+
+.live-mode-btn.active svg {
+  animation: pulse-live 1s ease-in-out infinite;
+}
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* TAP MODE BUTTON */
+.tap-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  color: #ffd700;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tap-mode-btn:hover {
+  background: rgba(255, 215, 0, 0.2);
+  transform: scale(1.02);
+}
+
+.tap-mode-btn.active {
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 165, 0, 0.2));
+  border-color: #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+}
+
+/* TAP STATS BAR */
+.tap-stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.tap-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.tap-stat svg {
+  color: var(--text-muted);
+}
+
+.tap-stat svg.fire {
+  color: #ff6b00;
+  filter: drop-shadow(0 0 6px rgba(255, 107, 0, 0.8));
+  animation: fire-pulse 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes fire-pulse {
+  to { transform: scale(1.2); }
+}
+
+.tap-stat .green { color: var(--primary-green); font-weight: 700; }
+.tap-stat .red { color: var(--negative-red); font-weight: 700; }
+
+.tap-bet-btns {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.tap-bet-btn {
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.tap-bet-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tap-bet-btn.active {
+  background: rgba(0, 200, 5, 0.2);
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+}
+
+.bets-count {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* TAP CELLS in the future grid */
+.tap-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  position: relative;
+}
+
+.tap-cell:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: scale(1.03);
+  z-index: 15;
+}
+
+.tap-cell:active {
+  transform: scale(0.97);
+}
+
+.tap-cell:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
+  z-index: 10;
+}
+
+.tap-cell:active {
+  transform: scale(0.95);
+}
+
+/* Above/Below current price */
+.tap-cell.above {
+  border-top: 2px solid rgba(0, 200, 5, 0.4);
+}
+
+.tap-cell.above:hover {
+  background: rgba(0, 200, 5, 0.25);
+  box-shadow: 0 0 20px rgba(0, 200, 5, 0.4);
+  transform: scale(1.05);
+  z-index: 20;
+}
+
+.tap-cell.below {
+  border-bottom: 2px solid rgba(255, 80, 0, 0.4);
+}
+
+.tap-cell.below:hover {
+  background: rgba(255, 80, 0, 0.25);
+  box-shadow: 0 0 20px rgba(255, 80, 0, 0.4);
+  transform: scale(1.05);
+  z-index: 20;
+}
+
+.tap-cell:active {
+  transform: scale(0.95);
+}
+
+/* Current price row */
+.tap-cell.current {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Has active bet */
+.tap-cell.has-bet {
+  background: rgba(0, 200, 5, 0.35) !important;
+  border: 2px solid var(--primary-green) !important;
+  animation: bet-pulse 1s ease-in-out infinite;
+}
+
+@keyframes bet-pulse {
+  0%, 100% { box-shadow: inset 0 0 15px rgba(0, 200, 5, 0.4); }
+  50% { box-shadow: inset 0 0 30px rgba(0, 200, 5, 0.6); }
+}
+
+/* Rarity tiers */
+.tap-cell.rare {
+  background: rgba(66, 135, 245, 0.15);
+  border-color: rgba(66, 135, 245, 0.3);
+}
+.tap-cell.rare .cell-mult { color: #4287f5; opacity: 0.8; }
+
+.tap-cell.epic {
+  background: rgba(163, 53, 238, 0.15);
+  border-color: rgba(163, 53, 238, 0.3);
+}
+.tap-cell.epic .cell-mult { color: #a335ee; opacity: 0.8; }
+
+.tap-cell.legendary {
+  background: rgba(255, 170, 0, 0.18);
+  border-color: rgba(255, 170, 0, 0.4);
+  animation: legendary-cell 2s ease-in-out infinite;
+}
+.tap-cell.legendary .cell-mult { color: #ffaa00; opacity: 1 !important; }
+
+@keyframes legendary-cell {
+  0%, 100% { box-shadow: inset 0 0 20px rgba(255, 170, 0, 0.3); }
+  50% { box-shadow: inset 0 0 40px rgba(255, 170, 0, 0.5); }
+}
+
+/* Multiplier text */
+.cell-mult {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.5);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  transition: all 0.15s;
+}
+
+.tap-cell:hover .cell-mult {
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* Price indicator line */
+.price-indicator-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--primary-green);
+  box-shadow: 0 0 15px rgba(0, 200, 5, 0.6);
+  pointer-events: none;
+  z-index: 25;
+}
+
+/* Results */
+.tap-results {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.tap-result {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  animation: result-pop 0.3s ease;
+}
+
+@keyframes result-pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.tap-result.won {
+  background: rgba(0, 200, 5, 0.2);
+  border: 1px solid var(--primary-green);
+  color: var(--primary-green);
+}
+
+.tap-result.lost {
+  background: rgba(255, 80, 0, 0.2);
+  border: 1px solid var(--negative-red);
+  color: var(--negative-red);
+}
+
+/* TAP MODE ACTIVE STATE */
+.stock-chart.tap-mode {
+  border-color: rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.1);
+}
+
 @media (max-width: 768px) {
   .stock-chart {
     padding: 20px;
@@ -182,5 +536,23 @@
 
   .chart-stat {
     min-width: calc(50% - 8px);
+  }
+
+  .tap-chart-grid {
+    height: 300px;
+  }
+
+  .tap-price-axis {
+    min-width: 60px;
+  }
+
+  .chart-controls {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tap-mode-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

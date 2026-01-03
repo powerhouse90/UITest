@@ -9,7 +9,7 @@ import { Portfolio } from './components/Portfolio';
 import { Leaderboard } from './components/Watchlist';
 import { HodlerRewards } from './components/HodlerRewards';
 import { TokenHistory } from './components/TokenHistory';
-import { isPreLaunch, todayToken, firstToken, nextToken, pastTokens, mockPositions, mockSpotHoldings, mockLeaderboard, generateMemeChartData } from './data/mockData';
+import { isPreLaunch as defaultPreLaunch, todayToken, firstToken, nextToken, pastTokens, mockPositions, mockSpotHoldings, mockLeaderboard, generateMemeChartData } from './data/mockData';
 import { CalendarIcon, TreasuryIcon, AnalyticsIcon, LightningIcon, RewardsIcon, GiftIcon, VaultIcon, PieChartIcon, TargetIcon, HomeIcon, ChartIcon, BriefcaseIcon, TrophyIcon } from './components/icons/PulseIcons';
 import './App.css';
 
@@ -17,6 +17,7 @@ function App() {
   const [currentTab, setCurrentTab] = useState('home');
   const [isConnected, setIsConnected] = useState(false);
   const [selectedToken, setSelectedToken] = useState(todayToken);
+  const [isPreLaunch, setIsPreLaunch] = useState(defaultPreLaunch);
   
   const chartData = useMemo(() => generateMemeChartData(24), []);
 
@@ -225,6 +226,22 @@ function App() {
           <span>Ranks</span>
         </button>
       </nav>
+
+      {/* Mode Toggle - for demo/development */}
+      <div className="mode-toggle">
+        <button 
+          className={`mode-btn ${isPreLaunch ? 'active' : ''}`}
+          onClick={() => setIsPreLaunch(true)}
+        >
+          Pre-Launch
+        </button>
+        <button 
+          className={`mode-btn ${!isPreLaunch ? 'active' : ''}`}
+          onClick={() => setIsPreLaunch(false)}
+        >
+          Live Mode
+        </button>
+      </div>
     </div>
   );
 }
