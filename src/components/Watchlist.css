@@ -446,3 +446,65 @@
   font-size: 16px;
   font-weight: 800;
 }
+
+/* Pre-launch State */
+.leaderboard.prelaunch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+}
+
+.leaderboard-prelaunch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 60px 24px;
+  max-width: 450px;
+}
+
+.leaderboard-prelaunch .prelaunch-trophy {
+  margin-bottom: 24px;
+}
+
+.leaderboard-prelaunch h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+}
+
+.leaderboard-prelaunch p {
+  color: #a0a0a0;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 32px 0;
+  max-width: 400px;
+}
+
+.prelaunch-prizes {
+  display: flex;
+  gap: 24px;
+}
+
+.prize-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.prize-medal {
+  font-size: 32px;
+}
+
+.prize-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

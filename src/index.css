@@ -368,3 +368,84 @@ img {
     min-height: 44px;
   }
 }
+
+/* ===== Pulse Logo Animations ===== */
+.pulse-logo {
+  /* Clean logo without extra effects */
+}
+
+.pulse-ring-outer {
+  animation: pulseRingOuter 3s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.pulse-ring-middle {
+  animation: pulseRingMiddle 3s ease-in-out infinite;
+  animation-delay: 0.5s;
+  transform-origin: center;
+}
+
+.pulse-core {
+  animation: pulseCore 2s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.pulse-line {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: pulseLine 2s ease-in-out infinite;
+}
+
+@keyframes pulseRingOuter {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulseRingMiddle {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes pulseCore {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.9;
+  }
+}
+
+@keyframes pulseLine {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  50% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}

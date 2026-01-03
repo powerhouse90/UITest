@@ -412,3 +412,150 @@
     font-size: 16px;
   }
 }
+
+/* Pre-launch State */
+.hodler-rewards.prelaunch {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+}
+
+.hodler-badge.coming-soon {
+  background: rgba(255, 170, 0, 0.15);
+  color: #ffaa00;
+  border-color: rgba(255, 170, 0, 0.3);
+}
+
+.prelaunch-rewards-content {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.prelaunch-rewards-content .prelaunch-icon {
+  color: var(--green-primary);
+  margin-bottom: 16px;
+  opacity: 0.8;
+}
+
+.prelaunch-rewards-content h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.prelaunch-rewards-content > p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0 0 32px 0;
+}
+
+.prelaunch-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.benefit-item svg {
+  color: var(--green-primary);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.benefit-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.benefit-item strong {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.benefit-item span {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.fee-preview {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  border: 1px solid var(--border-color);
+}
+
+.fee-preview h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+  text-align: left;
+}
+
+.fee-preview-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fee-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fee-bar .fee-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  width: 60px;
+  text-align: left;
+}
+
+.fee-bar .fee-progress {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-card);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fee-bar .fee-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.fee-bar .fee-fill.treasury {
+  background: linear-gradient(90deg, #00c805, #00a804);
+}
+
+.fee-bar .fee-fill.holders {
+  background: linear-gradient(90deg, #00a8ff, #0088cc);
+}
+
+.fee-bar .fee-fill.seed {
+  background: linear-gradient(90deg, #ff9500, #cc7700);
+}
+
+.fee-bar .fee-fill.burn {
+  background: linear-gradient(90deg, #ff5000, #cc4000);
+}
+
+.fee-bar .fee-percent {
+  font-size: 12px;
+  color: var(--text-muted);
+  width: 35px;
+  text-align: right;
+}

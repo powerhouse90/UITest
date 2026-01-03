@@ -1,8 +1,8 @@
 <!-- Use this file to provide workspace-specific custom instructions to Copilot. For more details, visit https://code.visualstudio.com/docs/copilot/copilot-customization#_use-a-githubcopilotinstructionsmd-file -->
 
-# Robinhood UI Clone
+# Pulse UI
 
-This is a React + TypeScript project built with Vite that replicates the Robinhood stock trading app UI.
+This is a React + TypeScript project built with Vite that implements a daily meme token trading platform with spot trading and leveraged perps.
 
 ## Tech Stack
 - React 18+ with TypeScript

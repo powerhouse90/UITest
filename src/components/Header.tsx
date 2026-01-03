@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Wallet, Home, TrendingUp, Trophy, Info, Menu, X, Vault, Flame } from 'lucide-react';
-import { mockTreasuryStats } from '../data/mockData';
+import { isPreLaunch, mockTreasuryStats, preLaunchTreasuryStats } from '../data/mockData';
+import { PulseIcon } from './icons/PulseIcons';
 import './Header.css';
 
 interface HeaderProps {
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 export function Header({ currentTab, onTabChange, isConnected, onConnect }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const treasuryStats = isPreLaunch ? preLaunchTreasuryStats : mockTreasuryStats;
 
   const tabs = [
     { id: 'home', label: 'Home', icon: Home },
@@ -21,7 +23,7 @@ export function Header({ currentTab, onTabChange, isConnected, onConnect }: Head
     { id: 'info', label: 'How It Works', icon: Info },
   ];
 
-  const treasuryProgress = (mockTreasuryStats.totalBalance / mockTreasuryStats.targetForMainLaunch) * 100;
+  const treasuryProgress = (treasuryStats.totalBalance / treasuryStats.targetForMainLaunch) * 100;
 
   return (
     <header className="header">
@@ -31,7 +33,7 @@ export function Header({ currentTab, onTabChange, isConnected, onConnect }: Head
           <div className="treasury-item">
             <Vault size={14} />
             <span className="treasury-label">Treasury:</span>
-            <span className="treasury-value">${mockTreasuryStats.totalBalance.toLocaleString()}</span>
+            <span className="treasury-value">${treasuryStats.totalBalance.toLocaleString()}</span>
           </div>
           <div className="treasury-progress-container">
             <div className="treasury-progress-bar">
@@ -40,12 +42,12 @@ export function Header({ currentTab, onTabChange, isConnected, onConnect }: Head
                 style={{ width: `${Math.min(treasuryProgress, 100)}%` }}
               />
             </div>
-            <span className="treasury-target">{treasuryProgress.toFixed(1)}% to main launch</span>
+            <span className="treasury-target">{isPreLaunch ? 'Launching soon' : `${treasuryProgress.toFixed(1)}% to main launch`}</span>
           </div>
           <div className="treasury-item">
             <Flame size={14} />
             <span className="treasury-label">Tokens Launched:</span>
-            <span className="treasury-value">{mockTreasuryStats.tokensLaunched}</span>
+            <span className="treasury-value">{treasuryStats.tokensLaunched}</span>
           </div>
         </div>
       </div>
@@ -53,8 +55,8 @@ export function Header({ currentTab, onTabChange, isConnected, onConnect }: Head
       <div className="header-content">
         <div className="header-left">
           <div className="logo" onClick={() => onTabChange('home')}>
-            <span className="logo-icon">🎰</span>
-            <span className="logo-text">PerpCasino</span>
+            <PulseIcon size={28} className="logo-icon-svg" />
+            <span className="logo-text">Pulse</span>
             <span className="logo-badge">BASE</span>
           </div>
         </div>
