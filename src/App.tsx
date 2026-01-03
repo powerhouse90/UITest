@@ -10,7 +10,7 @@ import { Leaderboard } from './components/Watchlist';
 import { HodlerRewards } from './components/HodlerRewards';
 import { TokenHistory } from './components/TokenHistory';
 import { isPreLaunch, todayToken, firstToken, nextToken, pastTokens, mockPositions, mockSpotHoldings, mockLeaderboard, generateMemeChartData } from './data/mockData';
-import { CalendarIcon, TreasuryIcon, AnalyticsIcon, LightningIcon, RewardsIcon, GiftIcon, VaultIcon, FlameIcon, TargetIcon, HomeIcon, ChartIcon, BriefcaseIcon, TrophyIcon } from './components/icons/PulseIcons';
+import { CalendarIcon, TreasuryIcon, AnalyticsIcon, LightningIcon, RewardsIcon, GiftIcon, VaultIcon, PieChartIcon, TargetIcon, HomeIcon, ChartIcon, BriefcaseIcon, TrophyIcon } from './components/icons/PulseIcons';
 import './App.css';
 
 function App() {
@@ -187,7 +187,7 @@ function App() {
               </div>
 
               <div className="info-card">
-                <div className="info-card-icon"><FlameIcon size={32} /></div>
+                <div className="info-card-icon"><PieChartIcon size={32} /></div>
                 <h3>Fee Distribution</h3>
                 <div className="fee-breakdown">
                   <div className="fee-item"><span className="fee-percent">40%</span> Treasury</div>

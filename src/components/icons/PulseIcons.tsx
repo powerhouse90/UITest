@@ -493,6 +493,24 @@ export function TargetIcon({ size = 32, className = '' }: IconProps) {
   );
 }
 
+// Pie chart icon for fee distribution
+export function PieChartIcon({ size = 32, className = '' }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" className={className}>
+      {/* 40% slice - Treasury */}
+      <path d="M16 16 L16 4 A12 12 0 0 1 27.4 20.4 Z" fill="#00c805"/>
+      {/* 40% slice - Holders */}
+      <path d="M16 16 L27.4 20.4 A12 12 0 0 1 4.6 20.4 Z" fill="#00c805" opacity="0.7"/>
+      {/* 15% slice - Seed */}
+      <path d="M16 16 L4.6 20.4 A12 12 0 0 1 10 5.4 Z" fill="#00c805" opacity="0.5"/>
+      {/* 5% slice - Burn */}
+      <path d="M16 16 L10 5.4 A12 12 0 0 1 16 4 Z" fill="#00c805" opacity="0.3"/>
+      {/* Center circle */}
+      <circle cx="16" cy="16" r="4" fill="#0a0a0a"/>
+    </svg>
+  );
+}
+
 // Long position icon (up arrow)
 export function LongIcon({ size = 20, className = '' }: IconProps) {
   return (
