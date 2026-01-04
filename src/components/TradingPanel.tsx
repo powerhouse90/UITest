@@ -6,12 +6,13 @@ import './TradingPanel.css';
 interface TradingPanelProps {
   token: MemeToken;
   positions?: Position[];
+  onOpenTapTrading?: () => void;
 }
 
-export function TradingPanel({ token, positions = [] }: TradingPanelProps) {
-  const [mode, setMode] = useState<'spot' | 'perps'>('spot');
+export function TradingPanel({ token, positions = [], onOpenTapTrading }: TradingPanelProps) {
+  const [mode, setMode] = useState<'spot' | 'perps'>('perps');
   const [direction, setDirection] = useState<'buy' | 'sell'>('buy');
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState('100');
   const [leverage, setLeverage] = useState(10);
   const [orderType, setOrderType] = useState<'market' | 'limit'>('market');
   const [limitPrice, setLimitPrice] = useState(token.price.toString());
@@ -78,6 +79,13 @@ export function TradingPanel({ token, positions = [] }: TradingPanelProps) {
                 onClick={() => setMode('perps')}
               >
                 Perps
+              </button>
+              <button 
+                className="mode-btn tap-mode-btn"
+                onClick={onOpenTapTrading}
+              >
+                <Zap size={14} />
+                Tap
               </button>
             </div>
 
