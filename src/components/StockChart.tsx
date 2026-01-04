@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { Zap, Flame, Trophy, Radio } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Radio } from 'lucide-react';
 import type { ChartData, MemeToken } from '../types';
 import './StockChart.css';
 
@@ -8,22 +8,8 @@ interface StockChartProps {
   token: MemeToken;
 }
 
-interface TapBox {
-  id: string;
-  priceMin: number;
-  priceMax: number;
-  timeStart: number; // Absolute timestamp when box starts
-  timeEnd: number;   // Absolute timestamp when box ends
-  multiplier: number;
-  amount: number;
-  row: number;
-  col: number;
-}
-
-const GRID_ROWS = 8;
-const GRID_COLS = 12;
-const BOX_DURATION = 3000; // Each box spans 3 seconds
-const VISIBLE_FUTURE_MS = 36000; // Show 36 seconds into future
+const GRID_ROWS = 5;
+const VISIBLE_FUTURE_MS = 40000;
 
 export function StockChart({ data, token }: StockChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -31,19 +17,11 @@ export function StockChart({ data, token }: StockChartProps) {
   
   // Mode state
   const [liveMode, setLiveMode] = useState(false);
-  const [tapMode, setTapMode] = useState(false);
   
   // Price state
   const [priceHistory, setPriceHistory] = useState<{time: number, price: number}[]>([]);
   const [currentPrice, setCurrentPrice] = useState(token.price);
   const [priceRange, setPriceRange] = useState({ min: token.price * 0.95, max: token.price * 1.05 });
-  
-  // Tap trading state
-  const [activeBets, setActiveBets] = useState<TapBox[]>([]);
-  const [betAmount, setBetAmount] = useState(10);
-  const [streak, setStreak] = useState(0);
-  const [totalPnL, setTotalPnL] = useState(0);
-  const [results, setResults] = useState<{won: boolean, payout: number}[]>([]);
   
   // Current time for animation
   const [now, setNow] = useState(() => Date.now());
@@ -72,12 +50,12 @@ export function StockChart({ data, token }: StockChartProps) {
       animationId = requestAnimationFrame(animate);
     };
     
-    if (liveMode || tapMode) {
+    if (liveMode) {
       animationId = requestAnimationFrame(animate);
     }
     
     return () => cancelAnimationFrame(animationId);
-  }, [liveMode, tapMode]);
+  }, [liveMode]);
 
   // LIVE MODE - Update price every second
   useEffect(() => {
@@ -107,77 +85,6 @@ export function StockChart({ data, token }: StockChartProps) {
 
     return () => clearInterval(interval);
   }, [liveMode]);
-
-  // Check bet outcomes - when box scrolls past NOW line
-  useEffect(() => {
-    if (!tapMode) return;
-
-    setActiveBets(prev => {
-      const stillActive: TapBox[] = [];
-      const expired: TapBox[] = [];
-      
-      prev.forEach(bet => {
-        if (now >= bet.timeEnd) {
-          expired.push(bet);
-        } else {
-          stillActive.push(bet);
-        }
-      });
-
-      expired.forEach(bet => {
-        const won = currentPrice >= bet.priceMin && currentPrice <= bet.priceMax;
-        const payout = won ? bet.amount * bet.multiplier : 0;
-        
-        setResults(r => [...r.slice(-4), { won, payout: won ? payout - bet.amount : -bet.amount }]);
-        setTotalPnL(p => p + (won ? payout - bet.amount : -bet.amount));
-        setStreak(s => won ? s + 1 : 0);
-      });
-
-      return stillActive;
-    });
-  }, [now, currentPrice, tapMode]);
-
-  // Calculate multiplier based on distance from current price
-  const getMultiplier = useCallback((priceMid: number) => {
-    const distPct = Math.abs(priceMid - currentPrice) / currentPrice * 100;
-    
-    if (distPct > 4) return 30;
-    if (distPct > 3) return 18;
-    if (distPct > 2.5) return 12;
-    if (distPct > 2) return 8;
-    if (distPct > 1.5) return 5;
-    if (distPct > 1) return 3;
-    if (distPct > 0.5) return 2;
-    return 1.5;
-  }, [currentPrice]);
-
-  // Handle tap on grid cell
-  const handleTap = (row: number, col: number) => {
-    const range = priceRange.max - priceRange.min;
-    const rowHeight = range / GRID_ROWS;
-    const priceMax = priceRange.max - row * rowHeight;
-    const priceMin = priceMax - rowHeight;
-    const priceMid = (priceMin + priceMax) / 2;
-    const multiplier = getMultiplier(priceMid);
-    
-    // Box time is fixed in the future based on column
-    const timeStart = now + col * BOX_DURATION;
-    const timeEnd = timeStart + BOX_DURATION;
-
-    const bet: TapBox = {
-      id: `${now}-${row}-${col}`,
-      priceMin,
-      priceMax,
-      timeStart,
-      timeEnd,
-      multiplier,
-      amount: betAmount,
-      row,
-      col,
-    };
-    
-    setActiveBets(prev => [...prev, bet]);
-  };
 
   // Draw canvas
   useEffect(() => {
@@ -228,18 +135,6 @@ export function StockChart({ data, token }: StockChartProps) {
       ctx.moveTo(chartPadding.left, y);
       ctx.lineTo(width - chartPadding.right, y);
       ctx.stroke();
-    }
-
-    // Draw vertical grid lines (time divisions)
-    for (let i = 0; i <= GRID_COLS; i++) {
-      const futureTime = now + i * BOX_DURATION;
-      const x = timeToX(futureTime);
-      if (x > nowX && x < width - chartPadding.right) {
-        ctx.beginPath();
-        ctx.moveTo(x, chartPadding.top);
-        ctx.lineTo(x, height - chartPadding.bottom);
-        ctx.stroke();
-      }
     }
 
     // Draw price line
@@ -333,61 +228,10 @@ export function StockChart({ data, token }: StockChartProps) {
       const y = priceToY(price);
       ctx.fillText(`$${price.toFixed(6)}`, width - 5, y + 3);
     }
-
-    // Future time labels
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-    ctx.textAlign = 'center';
-    for (let i = 1; i <= GRID_COLS; i++) {
-      const futureTime = now + i * BOX_DURATION;
-      const x = timeToX(futureTime);
-      if (x > nowX && x < width - chartPadding.right - 20) {
-        ctx.fillText(`${i * 3}s`, x, height - chartPadding.bottom + 12);
-      }
-    }
-
-    // Draw TAPPED BOXES (they scroll with time!)
-    if (tapMode) {
-      activeBets.forEach(bet => {
-        const x1 = timeToX(bet.timeStart);
-        const x2 = timeToX(bet.timeEnd);
-        const y1 = priceToY(bet.priceMax);
-        const y2 = priceToY(bet.priceMin);
-        
-        // Only draw if visible
-        if (x2 > chartPadding.left && x1 < width - chartPadding.right) {
-          const boxX = Math.max(chartPadding.left, x1);
-          const boxW = Math.min(x2, width - chartPadding.right) - boxX;
-          
-          // Box fill
-          ctx.fillStyle = 'rgba(0, 200, 5, 0.25)';
-          ctx.fillRect(boxX, y1, boxW, y2 - y1);
-          
-          // Box border
-          ctx.strokeStyle = '#00c805';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(boxX, y1, boxW, y2 - y1);
-          
-          // Multiplier text
-          if (boxW > 30) {
-            ctx.fillStyle = '#00c805';
-            ctx.font = 'bold 12px system-ui';
-            ctx.textAlign = 'center';
-            ctx.fillText(`${bet.multiplier}x`, boxX + boxW / 2, y1 + (y2 - y1) / 2 + 4);
-          }
-        }
-      });
-    }
-  }, [now, priceHistory, currentPrice, priceRange, tapMode, activeBets]);
-
-  // Get row for current price
-  const getCurrentPriceRow = () => {
-    const range = priceRange.max - priceRange.min;
-    const rowHeight = range / GRID_ROWS;
-    return Math.min(GRID_ROWS - 1, Math.max(0, Math.floor((priceRange.max - currentPrice) / rowHeight)));
-  };
+  }, [now, priceHistory, currentPrice, priceRange]);
 
   return (
-    <div className={`stock-chart ${tapMode ? 'tap-active' : ''}`}>
+    <div className="stock-chart">
       <div className="chart-header">
         <div className="chart-token-info">
           <span className="chart-token-image">{token.image}</span>
@@ -420,100 +264,12 @@ export function StockChart({ data, token }: StockChartProps) {
             <Radio size={14} />
             <span>LIVE</span>
           </button>
-          
-          <button 
-            className={`tap-mode-btn ${tapMode ? 'active' : ''}`}
-            onClick={() => {
-              setTapMode(!tapMode);
-              if (!tapMode && !liveMode) setLiveMode(true);
-            }}
-          >
-            <Zap size={14} />
-            <span>TAP TRADE</span>
-          </button>
         </div>
       </div>
-
-      {tapMode && (
-        <div className="tap-stats-bar">
-          <div className="tap-stat">
-            <Flame size={14} className={streak > 0 ? 'fire' : ''} />
-            <span>{streak} streak</span>
-          </div>
-          <div className="tap-stat">
-            <Trophy size={14} />
-            <span className={totalPnL >= 0 ? 'green' : 'red'}>
-              {totalPnL >= 0 ? '+' : ''}${totalPnL.toFixed(0)}
-            </span>
-          </div>
-          <div className="tap-stat">
-            <span className="bets-count">{activeBets.length} active</span>
-          </div>
-          <div className="tap-bet-btns">
-            {[5, 10, 25, 50].map(amt => (
-              <button 
-                key={amt} 
-                className={`tap-bet-btn ${betAmount === amt ? 'active' : ''}`}
-                onClick={() => setBetAmount(amt)}
-              >
-                ${amt}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       <div className="chart-wrapper" ref={containerRef}>
         <canvas ref={canvasRef} className="chart-canvas" />
-        
-        {/* TAP GRID OVERLAY - Covers future area, boxes placed here scroll with canvas */}
-        {tapMode && (
-          <div className="tap-grid-overlay">
-            {Array.from({ length: GRID_ROWS * GRID_COLS }).map((_, idx) => {
-              const row = Math.floor(idx / GRID_COLS);
-              const col = idx % GRID_COLS;
-              
-              const range = priceRange.max - priceRange.min;
-              const rowHeight = range / GRID_ROWS;
-              const priceMax = priceRange.max - row * rowHeight;
-              const priceMin = priceMax - rowHeight;
-              const priceMid = (priceMin + priceMax) / 2;
-              const multiplier = getMultiplier(priceMid);
-              
-              const currentRow = getCurrentPriceRow();
-              const isAbove = row < currentRow;
-              const isCurrent = row === currentRow;
-              
-              // Check if this cell already has a bet
-              const hasBet = activeBets.some(b => {
-                const betCol = Math.floor((b.timeStart - now) / BOX_DURATION);
-                return b.row === row && betCol === col;
-              });
-              
-              return (
-                <button
-                  key={`${row}-${col}`}
-                  className={`tap-cell ${isAbove ? 'above' : 'below'} ${isCurrent ? 'current' : ''} ${hasBet ? 'has-bet' : ''} ${multiplier >= 18 ? 'legendary' : multiplier >= 8 ? 'epic' : multiplier >= 5 ? 'rare' : ''}`}
-                  onClick={() => !hasBet && handleTap(row, col)}
-                  disabled={hasBet}
-                >
-                  <span className="cell-mult">{multiplier}x</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
       </div>
-
-      {tapMode && results.length > 0 && (
-        <div className="tap-results">
-          {results.slice(-3).map((r, i) => (
-            <div key={i} className={`tap-result ${r.payout >= 0 ? 'won' : 'lost'}`}>
-              {r.payout >= 0 ? `+$${r.payout.toFixed(0)} 🎉` : `-$${Math.abs(r.payout).toFixed(0)} 💀`}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 }
