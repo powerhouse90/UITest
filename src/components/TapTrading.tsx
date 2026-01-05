@@ -969,10 +969,7 @@ export function TapTrading({ onClose }: TapTradingProps) {
                       >
                         {[...Array(visibleCols + LEFT_BUFFER_COLS + 2)].map((_, colIdx) => {
                           const actualColIdx = colIdx + scrolledCols - LEFT_BUFFER_COLS;
-                          const { rowsFromCenter: cellRowsFromCenter, secondsLeft, multiplier, isNowCell, isPast, canBet, opacity: cellOpacityVal, isLong, isPriceInCell } = getCellInfo(visualRowIdx, actualColIdx);
-
-                          // Center row styling (rowsAway=0 relative to grid)
-                          const isCenterRow = cellRowsFromCenter === 0;
+                          const { rowsFromCenter: cellRowsFromCenter, secondsLeft, multiplier, isPast, canBet, opacity: cellOpacityVal, isLong, isPriceInCell } = getCellInfo(visualRowIdx, actualColIdx);
 
                           // Find bet for this cell - match by stored row and column indices
                           const cellBet = bets.find(b =>
@@ -996,7 +993,7 @@ export function TapTrading({ onClose }: TapTradingProps) {
                           return (
                             <button
                               key={`col-${colIdx}-row-${visualRowIdx}`}
-                              className={`tap-cell ${isLong ? 'long' : 'short'} ${isCenterRow ? 'center-row' : ''} ${isNowCell ? 'current-row' : ''} ${isPriceInCell ? 'price-row' : ''} ${isPast ? 'past' : ''} ${!canBet && !isPast ? 'no-bet' : ''} ${cellBet ? `has-bet ${cellBet.direction.toLowerCase()} ${isHologram ? 'hologram' : ''} ${statusClass}` : ''}`}
+                              className={`tap-cell ${isLong ? 'long' : 'short'} ${isPriceInCell ? 'price-row' : ''} ${isPast ? 'past' : ''} ${!canBet && !isPast ? 'no-bet' : ''} ${cellBet ? `has-bet ${cellBet.direction.toLowerCase()} ${isHologram ? 'hologram' : ''} ${statusClass}` : ''}`}
                               style={{
                                 left: colIdx * CELL_WIDTH,
                                 width: CELL_WIDTH,
@@ -1053,30 +1050,6 @@ export function TapTrading({ onClose }: TapTradingProps) {
                   );
                 })()}
 
-                {/* LIVE marker - FIXED at visual center where the price dot always appears */}
-                {(() => {
-                  const nowVisualCol = nowColIdx - colOffset;
-                  const nowX = nowVisualCol * CELL_WIDTH + CELL_WIDTH / 2;
-                  const isVisible = nowX >= 0 && nowX < gridWidth;
-                  if (!isVisible || displayPrice === 0) return null;
-
-                  // With vertical scrolling, the dot is always at the visual center
-                  // Account for marginTop offset and the vertical transform
-                  const marginTop = (containerHeight - gridHeight) / 2;
-                  const dotY = marginTop + gridHeight / 2 + verticalOffset;
-
-                  return (
-                    <div
-                      className="tap-live-marker"
-                      style={{
-                        left: nowX,
-                        top: dotY,
-                      }}
-                    >
-                      <span className="tap-live-label">LIVE</span>
-                    </div>
-                  );
-                })()}
               </div>
 
               {/* Bet markers container removed - integrated into cells */}
