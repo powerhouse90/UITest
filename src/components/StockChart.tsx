@@ -11,6 +11,16 @@ interface StockChartProps {
 const GRID_ROWS = 5;
 const VISIBLE_FUTURE_MS = 40000;
 
+// Helper to compute initial history from data
+function computeInitialHistory(data: ChartData[]) {
+  if (data.length === 0) return [];
+  const currentTime = Date.now();
+  return data.slice(-100).map((d, i) => ({
+    time: currentTime - (100 - i) * 1000,
+    price: d.value
+  }));
+}
+
 export function StockChart({ data, token }: StockChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -18,9 +28,12 @@ export function StockChart({ data, token }: StockChartProps) {
   // Mode state
   const [liveMode, setLiveMode] = useState(false);
   
-  // Price state
-  const [priceHistory, setPriceHistory] = useState<{time: number, price: number}[]>([]);
-  const [currentPrice, setCurrentPrice] = useState(token.price);
+  // Track previous data to detect changes
+  const [prevData, setPrevData] = useState(data);
+  
+  // Price state - initialized from computed values
+  const [priceHistory, setPriceHistory] = useState<{time: number, price: number}[]>(() => computeInitialHistory(data));
+  const [currentPrice, setCurrentPrice] = useState(() => data.length > 0 ? data[data.length - 1].value : token.price);
   const [priceRange, setPriceRange] = useState({ min: token.price * 0.95, max: token.price * 1.05 });
   
   // Current time for animation
@@ -28,18 +41,12 @@ export function StockChart({ data, token }: StockChartProps) {
 
   const isPositive = token.priceChangePercent24h >= 0;
 
-  // Initialize price history from data
-  useEffect(() => {
-    if (data.length > 0) {
-      const currentTime = Date.now();
-      const history = data.slice(-100).map((d, i) => ({
-        time: currentTime - (100 - i) * 1000,
-        price: d.value
-      }));
-      setPriceHistory(history);
-      setCurrentPrice(data[data.length - 1].value);
-    }
-  }, [data]);
+  // Sync price history when data changes - using the React pattern for derived state
+  if (data !== prevData && data.length > 0) {
+    setPrevData(data);
+    setPriceHistory(computeInitialHistory(data));
+    setCurrentPrice(data[data.length - 1].value);
+  }
 
   // Animation loop - updates every frame for smooth scrolling
   useEffect(() => {

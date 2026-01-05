@@ -48,17 +48,24 @@ export function TradingPanel({ token, positions = [], onOpenTapTrading }: Tradin
           <span>{mode === 'spot' ? 'Spot' : 'Perps'}</span>
         </div>
         <div className="panel-tabs">
-          <button 
+          <button
             className={`panel-tab ${activeTab === 'trade' ? 'active' : ''}`}
             onClick={() => setActiveTab('trade')}
           >
             Trade
           </button>
-          <button 
+          <button
             className={`panel-tab ${activeTab === 'positions' ? 'active' : ''}`}
             onClick={() => setActiveTab('positions')}
           >
             Positions
+          </button>
+          <button
+            className="panel-tab tap-tab"
+            onClick={onOpenTapTrading}
+          >
+            <Zap size={14} />
+            Tap
           </button>
         </div>
       </div>

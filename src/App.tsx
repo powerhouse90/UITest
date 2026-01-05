@@ -231,15 +231,15 @@ function App() {
         </nav>
 
         {/* Mode Toggle - for demo/development */}
-        <div className="mode-toggle">
-          <button 
-            className={`mode-btn ${isPreLaunch ? 'active' : ''}`}
+        <div className="dev-mode-toggle">
+          <button
+            className={`dev-mode-btn ${isPreLaunch ? 'active' : ''}`}
             onClick={() => setIsPreLaunch(true)}
           >
             Pre-Launch
           </button>
-          <button 
-            className={`mode-btn ${!isPreLaunch ? 'active' : ''}`}
+          <button
+            className={`dev-mode-btn ${!isPreLaunch ? 'active' : ''}`}
             onClick={() => setIsPreLaunch(false)}
           >
             Live Mode

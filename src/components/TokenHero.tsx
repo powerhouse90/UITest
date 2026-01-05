@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Clock, TrendingUp, TrendingDown, Zap, Award, Info, ChevronDown, ChevronUp, Diamond } from 'lucide-react';
+import { Clock, TrendingUp, TrendingDown, Zap, Award, Info } from 'lucide-react';
 import type { MemeToken } from '../types';
 import { getTimeUntilNextLaunch, mockTreasuryStats } from '../data/mockData';
 import './TokenHero.css';

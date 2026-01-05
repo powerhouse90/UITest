@@ -86,6 +86,19 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
+/* Yellow Tap Tab */
+.panel-tab.tap-tab {
+  color: #FFD700;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.panel-tab.tap-tab:hover {
+  background: rgba(255, 215, 0, 0.2);
+  color: #FFD700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
 .panel-content {
   padding: 16px 20px;
 }
@@ -127,13 +140,15 @@
 }
 
 .tap-mode-btn {
-  color: var(--orange-primary);
-  background: rgba(255, 165, 0, 0.05);
+  color: #FFD700;
+  background: rgba(255, 215, 0, 0.1);
+  border: 1px solid rgba(255, 215, 0, 0.3);
 }
 
 .tap-mode-btn:hover {
-  background: rgba(255, 165, 0, 0.1);
-  color: var(--orange-primary);
+  background: rgba(255, 215, 0, 0.2);
+  color: #FFD700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
 }
 
 .mode-badge {
