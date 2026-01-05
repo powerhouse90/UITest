@@ -26,6 +26,7 @@ interface Bet {
   rowSizePctAtPlacement: number;
   barrierLogB: number;
   targetPriceAbs: number;
+  cellCenterPriceAtPlacement: number; // The center price of the cell clicked - for tracking position as grid shifts
   multiplierLocked: number;
   amount: number;
   status: 'open' | 'won' | 'lost';
@@ -42,10 +43,8 @@ const HOUSE_EDGE = 0.92;
 const MAX_MULT = 100;
 const MIN_PROB = HOUSE_EDGE / MAX_MULT;
 
-const VISIBLE_ROWS = 9; // 4 above + center + 4 below
-const CELL_WIDTH = 56;
-const CELL_HEIGHT = 56;
-const PRICE_LABEL_WIDTH = 80;
+const CELL_WIDTH = 100;
+const CELL_HEIGHT = 100;
 const TIME_HEADER_HEIGHT = 28;
 const LEFT_BUFFER_COLS = 6; // Extra columns on left for slower fade-out effect
 
@@ -61,9 +60,9 @@ const TIMEFRAME_CONFIG: Record<View, {
   secondsPerBox: number; // Δ - time to traverse one box
   p4Target: number;      // Target touch probability for row 4 away within ONE box
 }> = {
-  '5s':  { secondsPerBox: 5,  p4Target: 0.05 },
+  '5s': { secondsPerBox: 5, p4Target: 0.05 },
   '30s': { secondsPerBox: 30, p4Target: 0.08 },
-  '1m':  { secondsPerBox: 60, p4Target: 0.10 },
+  '1m': { secondsPerBox: 60, p4Target: 0.10 },
 };
 
 // ============ MATH FUNCTIONS ============
@@ -112,17 +111,17 @@ function normInvCdf(p: number): number {
 
   if (p < pLow) {
     q = Math.sqrt(-2 * Math.log(p));
-    return (((((c[0]*q + c[1])*q + c[2])*q + c[3])*q + c[4])*q + c[5]) /
-           ((((d[0]*q + d[1])*q + d[2])*q + d[3])*q + 1);
+    return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
   } else if (p <= pHigh) {
     q = p - 0.5;
     r = q * q;
-    return (((((a[0]*r + a[1])*r + a[2])*r + a[3])*r + a[4])*r + a[5])*q /
-           (((((b[0]*r + b[1])*r + b[2])*r + b[3])*r + b[4])*r + 1);
+    return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+      (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
   } else {
     q = Math.sqrt(-2 * Math.log(1 - p));
-    return -(((((c[0]*q + c[1])*q + c[2])*q + c[3])*q + c[4])*q + c[5]) /
-            ((((d[0]*q + d[1])*q + d[2])*q + d[3])*q + 1);
+    return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+      ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
   }
 }
 
@@ -154,22 +153,12 @@ function touchProb(distancePct: number, secondsLeft: number, sigma1s: number): n
   return Math.max(0, Math.min(1, p));
 }
 
-// Get distance percentage for a given rowsAway value
-// rowsAway=0 means "touch either edge of current band" (0.5 * rowSizePct)
-function distancePctForRowsAway(rowsAway: number, rowSizePct: number): number {
-  if (rowsAway === 0) {
-    // "Same row" bet = touch either edge of current band
-    return 0.5 * rowSizePct;
-  }
-  return Math.abs(rowsAway) * rowSizePct;
-}
+// Compute multiplier for a cell based on real-time price distance
+function computeMultiplier(targetPrice: number, currentPrice: number, secondsLeft: number, sigma1s: number): number {
+  if (secondsLeft <= 0 || currentPrice <= 0) return 0;
 
-// Compute multiplier for a cell
-function computeMultiplier(rowsAway: number, secondsLeft: number, sigma1s: number, rowSizePct: number): number {
-  if (secondsLeft <= 0) return 0;
-
-  const distancePct = distancePctForRowsAway(rowsAway, rowSizePct);
-  const p = touchProb(distancePct, secondsLeft, sigma1s);
+  const distPct = Math.abs(targetPrice - currentPrice) / currentPrice;
+  const p = touchProb(distPct, secondsLeft, sigma1s);
   const pEff = Math.max(p, MIN_PROB);
   const mult = HOUSE_EDGE / pEff;
 
@@ -182,16 +171,16 @@ function computeMultiplier(rowsAway: number, secondsLeft: number, sigma1s: numbe
 // Returns a CONTINUOUS opacity value - cells fade as they APPROACH NOW, gone by the time they hit it
 function cellOpacity(j: number, tInBox: number, secondsPerBox: number): number {
   const progress = tInBox / secondsPerBox; // 0 at start of box, approaching 1 at end
-  
+
   // Use fractional box position for smooth transitions
   // fractionalJ = how many boxes ahead of NOW this cell is
   const fractionalJ = j - progress;
-  
+
   // Past boxes (behind NOW): completely invisible
   if (fractionalJ < 0) {
     return 0;
   }
-  
+
   // Fade happens over 2 boxes BEFORE reaching NOW
   // At fractionalJ = 2+: full opacity (1.0)
   // At fractionalJ = 0: completely gone (0.0)
@@ -199,7 +188,7 @@ function cellOpacity(j: number, tInBox: number, secondsPerBox: number): number {
   if (fractionalJ < 2) {
     return Math.min(1, fractionalJ / 2);
   }
-  
+
   // Future boxes (2+ ahead): full opacity
   return 1.0;
 }
@@ -212,6 +201,8 @@ export function TapTrading({ onClose }: TapTradingProps) {
 
   // Layout state
   const [containerWidth, setContainerWidth] = useState(1000);
+  const [containerHeight, setContainerHeight] = useState(800);
+  const [visibleRows, setVisibleRows] = useState(9);
 
   // Use real Bitcoin price feed (Binance + Coinbase)
   const priceFeed = usePriceFeed();
@@ -251,6 +242,8 @@ export function TapTrading({ onClose }: TapTradingProps) {
   const high1sRef = useRef<number>(0); // Track high price for settlement
   const low1sRef = useRef<number>(0); // Track low price for settlement
   const settledBetsRef = useRef<Set<string>>(new Set()); // Prevent duplicate settlements
+  const gridCenterPriceRef = useRef<number>(0);
+  const [gridCenterPrice, setGridCenterPrice] = useState(0);
 
   // Time origin for smooth auto-scroll
   const timeOriginRef = useRef<number>(Date.now());
@@ -272,17 +265,31 @@ export function TapTrading({ onClose }: TapTradingProps) {
     return pct;
   }, [sigma1s, config.secondsPerBox, config.p4Target]);
 
+  // Calculate vertical scroll offset - grid moves as price changes (camera panning)
+  const verticalOffset = useMemo(() => {
+    if (displayPrice === 0 || gridCenterPrice === 0 || rowSizePct === 0) return 0;
+    const pctFromCenter = (displayPrice - gridCenterPrice) / gridCenterPrice;
+    const rowsFromCenter = pctFromCenter / rowSizePct;
+    // Positive offset when price is UP (grid moves down to show higher prices)
+    return rowsFromCenter * CELL_HEIGHT;
+  }, [displayPrice, gridCenterPrice, rowSizePct]);
+
+  // Calculate live dot Y position for background syncing (now simpler - dot at center)
+  const dotYPos = useMemo(() => {
+    // With vertical scrolling, the dot is always at the center
+    return 0.5;
+  }, []);
+
   // Compute lockout boxes based on fixed LOCKOUT_SECONDS
   const lockoutBoxes = Math.ceil(LOCKOUT_SECONDS / config.secondsPerBox);
 
   // Grid dimensions
   const visibleCols = useMemo(() => {
-    const availableWidth = containerWidth - PRICE_LABEL_WIDTH;
-    return Math.max(10, Math.floor(availableWidth / CELL_WIDTH));
+    return Math.max(10, Math.ceil(containerWidth / CELL_WIDTH) + 2);
   }, [containerWidth]);
 
   const gridWidth = visibleCols * CELL_WIDTH;
-  const gridHeight = VISIBLE_ROWS * CELL_HEIGHT;
+  const gridHeight = visibleRows * CELL_HEIGHT;
 
   // NOW column is at ~33% from left
   const nowColIdx = Math.floor(visibleCols * 0.33);
@@ -291,30 +298,20 @@ export function TapTrading({ onClose }: TapTradingProps) {
   // Update price history when we get new prices from the feed
   useEffect(() => {
     if (currentPrice && currentPrice > 0) {
-      const now = Date.now();
 
       // Initialize display price AND ref
-      if (displayPrice === 0) {
+      if (displayPriceRef.current === 0) {
         setDisplayPrice(currentPrice);
-        displayPriceRef.current = currentPrice; // Initialize ref too!
+        displayPriceRef.current = currentPrice;
+        setGridCenterPrice(currentPrice);
+        gridCenterPriceRef.current = currentPrice;
       }
 
       // Update high/low refs for settlement (to catch price spikes)
       high1sRef.current = high1s || currentPrice;
       low1sRef.current = low1s || currentPrice;
-
-      // Update price history (keep last 60 seconds)
-      setPriceHistory(prev => {
-        const cutoff = now - 60000;
-        const filtered = prev.filter(p => p.time > cutoff);
-        return [...filtered, { time: now, price: currentPrice }];
-      });
-      priceHistoryRef.current = [
-        ...priceHistoryRef.current.filter(p => p.time > now - 60000),
-        { time: now, price: currentPrice }
-      ];
     }
-  }, [currentPrice, displayPrice]);
+  }, [currentPrice]);
 
   // ============ UNIFIED ANIMATION LOOP ============
   // Single RAF loop for all animations to prevent jitter/jolts
@@ -338,21 +335,38 @@ export function TapTrading({ onClose }: TapTradingProps) {
         }
         displayPriceRef.current = visualPrice;
         setDisplayPrice(visualPrice);
+
+        // Very slowly drift gridCenterPrice toward visualPrice
+        // Slow drift means vertical scrolling is visible as price moves
+        const drift = (visualPrice - gridCenterPriceRef.current) * 0.002;
+        gridCenterPriceRef.current += drift;
+        setGridCenterPrice(gridCenterPriceRef.current);
+
+        // Record visual price into history for perfect chart alignment
+        const lastPoint = priceHistoryRef.current[priceHistoryRef.current.length - 1];
+        if (!lastPoint || now - lastPoint.time > 50) { // Keep reasonably high fidelity for the comet tail
+          const newHistory = [
+            ...priceHistoryRef.current.filter(p => p.time > now - 60000),
+            { time: now, price: visualPrice }
+          ];
+          priceHistoryRef.current = newHistory;
+          setPriceHistory(newHistory);
+        }
       }
 
       // Check bet settlements using VISUAL displayPrice (matches what user sees)
       // Use betsRef to avoid stale closure issues with RAF
       const currentBets = betsRef.current;
-      
+
       if (visualPrice !== 0 && currentBets.length > 0) {
-        
+
         let pnlDelta = 0;
         const updatedBets = currentBets.map(bet => {
           // Already resolved bets just pass through to the filter
           if (bet.status !== 'open') {
             return bet;
           }
-          
+
           // Prevent duplicate settlements for OPEN bets (React Strict Mode can call twice)
           if (settledBetsRef.current.has(bet.id)) return bet;
 
@@ -360,44 +374,26 @@ export function TapTrading({ onClose }: TapTradingProps) {
           const msUntilStart = bet.startsAt - now;
           const secondsUntilStart = msUntilStart / 1000;
           const boxesFromNow = secondsUntilStart / config.secondsPerBox;
-          
+
           // Active when price dot is VISUALLY inside bet marker
           // Bet's LEFT edge reaches NOW line when boxesFromNow = 0.5
           // Bet's RIGHT edge leaves NOW line when boxesFromNow = -0.5
           // Only check for touches when dot is actually in the box!
           const boxIsActive = boxesFromNow <= 0.5 && boxesFromNow >= -0.5;
-          const timeUntilExpiry = bet.expiryAt - now;
-
-          // Calculate rows from center (same formula as visual)
-          const currentRowSizePct = rowSizePctRef.current;
-          if (currentRowSizePct === 0) return bet; // Safety check
-          
-          const targetPrice = bet.targetPriceAbs;
-          const pctFromCenter = (targetPrice - visualPrice) / visualPrice;
-          const rowsFromCenterFloat = pctFromCenter / currentRowSizePct;
 
           if (boxIsActive) {
             let touched = false;
 
-            if (bet.rowsAwayAtPlacement === 0) {
-              // Center row bet: the dot is ALWAYS at center row
-              // When dot enters the box horizontally (boxIsActive), it's touching
-              // The bet marker is at center, the dot is at center = they overlap
-              touched = true; // Always touching when dot is in the box
+            // Win if price is on the correct side of the target barrier
+            if (bet.direction === 'LONG') {
+              touched = visualPrice >= bet.targetPriceAbs;
             } else {
-              // Directional bet: wins if rows is within touching distance
-              if (bet.direction === 'LONG') {
-                // LONG: target above center, wins when rows <= 1.0
-                touched = rowsFromCenterFloat <= 1.0 && rowsFromCenterFloat >= -0.5;
-              } else {
-                // SHORT: target below center (negative rows), wins when rows >= -1.0
-                touched = rowsFromCenterFloat >= -1.0 && rowsFromCenterFloat <= 0.5;
-              }
+              touched = visualPrice <= bet.targetPriceAbs;
             }
 
             if (touched) {
               settledBetsRef.current.add(bet.id);
-              console.log(`🎉 BET WON! ${bet.direction} target=${targetPrice.toFixed(0)} payout=${(bet.amount * bet.multiplierLocked).toFixed(2)}`);
+              console.log(`🎉 BET WON! ${bet.direction} target=${bet.targetPriceAbs.toFixed(0)} payout=${(bet.amount * bet.multiplierLocked).toFixed(2)}`);
               pnlDelta += bet.amount * bet.multiplierLocked - bet.amount;
               return { ...bet, status: 'won' as const, touchedAt: now };
             }
@@ -407,7 +403,7 @@ export function TapTrading({ onClose }: TapTradingProps) {
           // This happens when boxesFromNow < -0.5 (dot has exited right edge of bet)
           if (boxesFromNow < -0.5) {
             settledBetsRef.current.add(bet.id);
-            console.log(`❌ BET LOST! ${bet.direction} target=${targetPrice.toFixed(0)} - dot exited box`);
+            console.log(`❌ BET LOST! ${bet.direction} target=${bet.targetPriceAbs.toFixed(0)} - dot exited box`);
             pnlDelta -= bet.amount;
             return { ...bet, status: 'lost' as const, touchedAt: now };
           }
@@ -423,17 +419,17 @@ export function TapTrading({ onClose }: TapTradingProps) {
         // Also clean up settledBetsRef when removing bets
         const finalBets = updatedBets.filter(bet => {
           if (bet.status === 'open') return true;
-          
+
           const resolvedAt = bet.touchedAt || now;
           const age = now - resolvedAt;
-          
+
           const keep = age < 1500;
           if (!keep) {
             settledBetsRef.current.delete(bet.id);
           }
           return keep;
         });
-        
+
         // Update both ref and state
         betsRef.current = finalBets;
         setBets(finalBets);
@@ -474,16 +470,24 @@ export function TapTrading({ onClose }: TapTradingProps) {
     if (history.length < 2) return;
 
     const now = Date.now();
-    // Account for rowOffset so chart moves when user drags vertically
+    // Center the chart vertically in the GRID (not container) to match cell positions
     const centerY = gridHeight / 2 - rowOffset * CELL_HEIGHT;
     // NOW position - FIXED visual position, never moves
     const nowVisualCol = nowColIdx - colOffset;
     const nowX = nowVisualCol * CELL_WIDTH + CELL_WIDTH / 2;
 
-    // Draw price line
+    // Draw price line with comet tail effect
+    const tailLength = 400; // Pixels of history to show in the tail
+    const gradient = ctx.createLinearGradient(nowX - tailLength, 0, nowX, 0);
+    gradient.addColorStop(0, 'rgba(255, 215, 0, 0)');      // Transparent at the start
+    gradient.addColorStop(0.5, 'rgba(255, 215, 0, 0.2)');  // Faded middle
+    gradient.addColorStop(1, 'rgba(255, 215, 0, 0.8)');    // Bright at the tip
+
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+    ctx.strokeStyle = gradient;
     ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
 
     let first = true;
     for (const point of history) {
@@ -491,12 +495,12 @@ export function TapTrading({ onClose }: TapTradingProps) {
       // Chart stays fixed, anchored to NOW position
       const x = nowX - (secondsAgo / config.secondsPerBox) * CELL_WIDTH;
 
-      if (x < 0 || x > gridWidth) continue;
+      if (x < nowX - tailLength || x > nowX + 50) continue; // Limit tail to gradient bounds
 
-      // Convert price to Y position
-      const pctFromCenter = (point.price - displayPrice) / displayPrice;
-      const rowsFromCenter = pctFromCenter / rowSizePct;
-      const y = centerY - rowsFromCenter * CELL_HEIGHT;
+      // Convert price to Y position relative to GRID CENTER
+      const pctFromGridCenter = (point.price - gridCenterPrice) / gridCenterPrice;
+      const rowsFromGridCenter = pctFromGridCenter / rowSizePct;
+      const y = centerY - rowsFromGridCenter * CELL_HEIGHT;
 
       if (first) {
         ctx.moveTo(x, y);
@@ -507,12 +511,26 @@ export function TapTrading({ onClose }: TapTradingProps) {
     }
     ctx.stroke();
 
-    // Draw current price dot
+    // Draw pulsing highlight aura around LIVE dot
+    const pulse = (Math.sin(Date.now() / 200) + 1) / 2; // 0..1
+    const currentPctFromGridCenter = (displayPrice - gridCenterPrice) / gridCenterPrice;
+    const currentRowsFromGridCenter = currentPctFromGridCenter / rowSizePct;
+    const dotY = centerY - currentRowsFromGridCenter * CELL_HEIGHT;
+
+    ctx.beginPath();
+    ctx.arc(nowX, dotY, 10 + pulse * 10, 0, Math.PI * 2);
+    const auraGradient = ctx.createRadialGradient(nowX, dotY, 0, nowX, dotY, 10 + pulse * 10);
+    auraGradient.addColorStop(0, 'rgba(255, 215, 0, 0.4)');
+    auraGradient.addColorStop(1, 'rgba(255, 215, 0, 0)');
+    ctx.fillStyle = auraGradient;
+    ctx.fill();
+
+    // Draw main price dot
     ctx.beginPath();
     ctx.fillStyle = '#FFD700';
     ctx.shadowColor = '#FFD700';
-    ctx.shadowBlur = 10;
-    ctx.arc(nowX, centerY, 6, 0, Math.PI * 2);
+    ctx.shadowBlur = 15;
+    ctx.arc(nowX, dotY, 6, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
 
@@ -522,7 +540,15 @@ export function TapTrading({ onClose }: TapTradingProps) {
   useEffect(() => {
     const updateSize = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.clientWidth);
+        const width = containerRef.current.clientWidth;
+        const height = containerRef.current.clientHeight;
+        setContainerWidth(width);
+        setContainerHeight(height);
+
+        // Calculate rows to fill height, prefer odd number for center row
+        // Add extra rows to ensure total coverage and smooth scrolling
+        const rows = Math.ceil(height / CELL_HEIGHT) + 4;
+        setVisibleRows(rows % 2 === 0 ? rows + 1 : rows);
       }
     };
     updateSize();
@@ -568,24 +594,28 @@ export function TapTrading({ onClose }: TapTradingProps) {
   const placeBet = useCallback((rowsAway: number, secondsLeft: number, colIdx: number) => {
     if (secondsLeft <= 0 || displayPrice === 0) return;
 
-    // For rowsAway=0 (center row), bet is "touch either edge"
-    // Direction is determined by row position for non-zero rows
-    // For center row, we'll use LONG but both edges trigger win
-    const direction: 'LONG' | 'SHORT' = rowsAway <= 0 ? 'LONG' : 'SHORT';
-    const absRowsAway = Math.abs(rowsAway);
+    // Calculate the price range of the clicked cell
+    const pctFromGridCenter = -rowsAway * rowSizePct;
+    const cellCenterPrice = gridCenterPrice * (1 + pctFromGridCenter);
+    const halfRowSize = (rowSizePct * gridCenterPrice) / 2;
 
-    // Calculate target price using the new distancePctForRowsAway function
-    const distancePct = distancePctForRowsAway(rowsAway, rowSizePct);
-    const barrierLogB = Math.log(1 + distancePct);
+    // Determine direction relative to LIVE price dot (not grid center)
+    // If we click a cell above current price, it's a LONG.
+    const direction: 'LONG' | 'SHORT' = cellCenterPrice >= displayPrice ? 'LONG' : 'SHORT';
 
-    // For rowsAway=0, target is the edge of the band (either direction)
-    // We'll store both edges for settlement
+    // "In the box" win condition:
+    // For LONG: Win if price >= lower boundary of cell
+    // For SHORT: Win if price <= upper boundary of cell
     const targetPriceAbs = direction === 'LONG'
-      ? displayPrice * Math.exp(barrierLogB)
-      : displayPrice * Math.exp(-barrierLogB);
+      ? cellCenterPrice - halfRowSize
+      : cellCenterPrice + halfRowSize;
 
-    // Calculate multiplier
-    const multiplier = computeMultiplier(rowsAway, secondsLeft, sigma1s, rowSizePct);
+    // Target distance for probability math
+    const distPct = Math.abs(targetPriceAbs - displayPrice) / displayPrice;
+    const barrierLogB = Math.log(1 + distPct);
+
+    // Calculate multiplier based on real-time price distance
+    const multiplier = computeMultiplier(targetPriceAbs, displayPrice, secondsLeft, sigma1s);
     if (multiplier <= 1) return;
 
     // Calculate when the box starts and ends
@@ -595,10 +625,6 @@ export function TapTrading({ onClose }: TapTradingProps) {
     const now = Date.now();
     const expiryAt = now + secondsLeft * 1000;
     const startsAt = expiryAt - config.secondsPerBox * 1000;
-    
-    // Calculate what boxesFromNow will be immediately after placement
-    const initialBoxesFromNow = (startsAt - now) / 1000 / config.secondsPerBox;
-    console.log(`🎯 PLACING: secondsLeft=${secondsLeft.toFixed(1)}s | boxes=${initialBoxesFromNow.toFixed(2)} (should match visual cell position)`);
 
     const bet: Bet = {
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -609,12 +635,13 @@ export function TapTrading({ onClose }: TapTradingProps) {
       startsAt,
       expiryAt,
       direction,
-      rowsAwayAtPlacement: absRowsAway,
+      rowsAwayAtPlacement: rowsAway, // We'll keep this as the grid offset
       priceAtPlacement: displayPrice,
       sigmaAtPlacement: sigma1s,
       rowSizePctAtPlacement: rowSizePct,
       barrierLogB,
       targetPriceAbs,
+      cellCenterPriceAtPlacement: cellCenterPrice, // Track the price level for grid shifting
       multiplierLocked: multiplier,
       amount: betAmount,
       status: 'open',
@@ -623,15 +650,15 @@ export function TapTrading({ onClose }: TapTradingProps) {
     // Update both ref and state when adding a bet
     betsRef.current = [...betsRef.current, bet];
     setBets(betsRef.current);
-  }, [displayPrice, sigma1s, rowSizePct, view, betAmount, smoothScrollX, config.secondsPerBox]);
+  }, [displayPrice, sigma1s, rowSizePct, view, betAmount, smoothScrollX, config.secondsPerBox, gridCenterPrice]);
 
   // ============ GET CELL INFO ============
   // Calculate time into current box from smooth scroll
   const tInBox = (smoothScrollX % CELL_WIDTH) / CELL_WIDTH * config.secondsPerBox;
 
   const getCellInfo = useCallback((visualRowIdx: number, actualColIdx: number) => {
-    // Visual row 0 is top, center is at VISIBLE_ROWS/2
-    const centerVisualRow = Math.floor(VISIBLE_ROWS / 2);
+    // Visual row 0 is top, center is at visibleRows/2
+    const centerVisualRow = Math.floor(visibleRows / 2);
     const rowsFromCenter = visualRowIdx - centerVisualRow + rowOffset;
 
     // Calculate box index (j) relative to NOW
@@ -651,8 +678,38 @@ export function TapTrading({ onClose }: TapTradingProps) {
     // Can bet on any future box (lockout only prevents immediate boxes for latency)
     const canBet = boxIndex >= lockoutBoxes && secondsLeft > 0;
 
-    // Calculate multiplier for all non-past boxes
-    const multiplier = !isPast && secondsLeft > 0 ? computeMultiplier(rowsFromCenter, secondsLeft, sigma1s, rowSizePct) : 0;
+    // Price at this row relative to CURRENT grid center
+    const pctFromCenter = -rowsFromCenter * rowSizePct;
+    const cellCenterPrice = gridCenterPrice * (1 + pctFromCenter);
+    const halfRowSize = (rowSizePct * gridCenterPrice) / 2;
+
+    const cellTop = cellCenterPrice + halfRowSize;
+    const cellBottom = cellCenterPrice - halfRowSize;
+
+    // Check if live price is in this cell using PRICE comparison (not pixels)
+    // This stays correct regardless of vertical scrolling transforms
+    const isPriceInCell = displayPrice >= cellBottom && displayPrice <= cellTop;
+
+    // Direction: cell is LONG if its price range is ABOVE displayPrice
+    const isLong = cellCenterPrice > displayPrice;
+
+    // Entry boundary: for LONG (cell above price), target is cell's bottom edge
+    // For SHORT (cell below price), target is cell's top edge
+    const entryBoundaryPrice = isLong ? cellBottom : cellTop;
+
+    // Calculate multiplier for all non-past boxes based on real-time price distance to boundary
+    // If price is in cell, multiplier is always 1.01x (Visual Sync)
+    let multiplier = 0;
+    if (!isPast && secondsLeft > 0) {
+      if (isPriceInCell) {
+        multiplier = 1.01;
+      } else {
+        multiplier = computeMultiplier(entryBoundaryPrice, displayPrice, secondsLeft, sigma1s);
+        // Force clamp to 1.01x if we are VERY close visually but not quite inside
+        // logical distance check to prevent "jumping" multipliers
+        if (multiplier < 1.01) multiplier = 1.01;
+      }
+    }
 
     // NOW cell is box 0 at center row
     const isNowCell = boxIndex === 0 && rowsFromCenter === 0;
@@ -660,124 +717,11 @@ export function TapTrading({ onClose }: TapTradingProps) {
     // Opacity for dimming past cells (smooth fade)
     const opacity = cellOpacity(boxIndex, tInBox, config.secondsPerBox);
 
-    // Price at this row
-    const pctFromCenter = -rowsFromCenter * rowSizePct;
-    const priceAtRow = displayPrice * (1 + pctFromCenter);
+    return { rowsFromCenter, secondsLeft, multiplier, isNowCell, isPast, canBet, priceAtRow: cellCenterPrice, boxIndex, opacity, isLong, isPriceInCell };
+  }, [rowOffset, colOffset, smoothScrollX, tInBox, nowColIdx, config.secondsPerBox, sigma1s, rowSizePct, displayPrice, lockoutBoxes, gridCenterPrice, visibleRows]);
 
-    return { rowsFromCenter, secondsLeft, multiplier, isNowCell, isPast, canBet, priceAtRow, boxIndex, opacity };
-  }, [rowOffset, colOffset, smoothScrollX, tInBox, nowColIdx, config.secondsPerBox, sigma1s, rowSizePct, displayPrice, lockoutBoxes]);
-
-  // ============ RENDER BET MARKERS ============
-  // Render bet markers as overlays positioned by absolute time (works across timeframes)
-  // Bet markers are positioned absolutely in tap-grid, NOT inside the transformed tap-cells
-
-  const renderBetMarkers = useMemo(() => {
-    if (displayPrice === 0) return null;
-
-    const now = Date.now();
-    const currentSecondsPerBox = config.secondsPerBox;
-
-    return bets
-      .filter(bet => {
-        // Show open bets, and recently resolved bets (for animation)
-        if (bet.status === 'open') return true;
-        // Show won/lost bets for 1.5 seconds after resolution
-        const resolvedAt = bet.touchedAt || bet.expiryAt;
-        return now - resolvedAt < 1500;
-      })
-      .map(bet => {
-        // Calculate row position based on TARGET price (where the bet wins)
-        const targetPrice = bet.rowsAwayAtPlacement === 0 
-          ? bet.priceAtPlacement  // Center row: show at placement price
-          : bet.targetPriceAbs;   // Directional: show at target price
-        const pctFromCenter = (targetPrice - displayPrice) / displayPrice;
-        // Match chart's Y calculation: positive pctFromCenter = above center
-        const rowsFromCenterFloat = pctFromCenter / rowSizePct;
-        // Higher price = negative Y direction (up on screen = lower row index)
-        const visualRow = Math.floor(VISIBLE_ROWS / 2) - rowsFromCenterFloat - rowOffset;
-
-
-
-        // Check if this bet is from a different timeframe
-        const isHologram = bet.timeframe !== view;
-
-        // Get the bet's original duration (from its timeframe)
-        const betSecondsPerBox = TIMEFRAME_CONFIG[bet.timeframe].secondsPerBox;
-        
-        // Calculate the width of the bet marker in current view's scale
-        // If bet was 5s and we're viewing 1min (60s), width = 5/60 * CELL_WIDTH
-        const betWidthRatio = betSecondsPerBox / currentSecondsPerBox;
-        const betWidth = Math.max(8, betWidthRatio * CELL_WIDTH - 2); // Minimum 8px width
-
-        // Calculate position using ABSOLUTE TIME from NOW
-        // The bet STARTS at startsAt and ENDS at expiryAt
-        // Position the LEFT edge of the bet marker at startsAt
-        const msUntilStart = bet.startsAt - now;
-        const secondsUntilStart = msUntilStart / 1000;
-        
-        // Position = how many boxes ahead of NOW the bet starts
-        // Positive = future (right of NOW), Negative = past (left of NOW)
-        const boxesFromNow = secondsUntilStart / currentSecondsPerBox;
-        
-        // The visual position relative to FIXED NOW line
-        // NOW line is at a fixed position, bet moves relative to time
-        const nowX = (nowColIdx - colOffset) * CELL_WIDTH + CELL_WIDTH / 2;
-        // Bet's left edge is boxesFromNow * CELL_WIDTH to the right of NOW
-        const x = nowX + boxesFromNow * CELL_WIDTH - CELL_WIDTH / 2;
-        const y = visualRow * CELL_HEIGHT;
-
-        // Check if visible - extend left buffer for resolved bets to show animation
-        if (visualRow < -0.5 || visualRow > VISIBLE_ROWS - 0.5) return null;
-        const leftLimit = bet.status !== 'open' ? -CELL_WIDTH * 8 : -CELL_WIDTH * 2;
-        if (x < leftLimit || x > gridWidth + CELL_WIDTH) return null;
-
-        // Calculate opacity for bet markers
-        // Resolved bets fade out over ~4 boxes as they scroll left
-        let betOpacity = 1;
-        if (bet.status !== 'open') {
-          // For resolved bets, fade based on how far behind NOW they are
-          // boxesFromNow is negative when behind NOW
-          // Fade from 1 at NOW to 0 at 4 boxes behind
-          betOpacity = Math.max(0, Math.min(1, 1 + boxesFromNow / 4));
-        }
-
-        // Determine status class for animations
-        const statusClass = bet.status === 'won' ? 'won' : bet.status === 'lost' ? 'lost' : '';
-
-        return (
-          <div
-            key={bet.id}
-            className={`bet-marker ${bet.direction.toLowerCase()} ${isHologram ? 'hologram' : ''} ${statusClass}`}
-            style={{
-              left: x,
-              top: y,
-              width: betWidth,
-              height: CELL_HEIGHT - 2,
-              opacity: betOpacity,
-            }}
-          >
-            {bet.status === 'won' ? (
-              <>
-                <span className="bet-marker-result">+${(bet.amount * bet.multiplierLocked - bet.amount).toFixed(2)}</span>
-                <span className="bet-marker-win-text">WIN!</span>
-              </>
-            ) : bet.status === 'lost' ? (
-              <>
-                <span className="bet-marker-result">-${bet.amount.toFixed(2)}</span>
-                <span className="bet-marker-loss-text">MISS</span>
-              </>
-            ) : (
-              <>
-                <span className="bet-marker-amount">${bet.amount}</span>
-                <span className="bet-marker-mult">{bet.multiplierLocked.toFixed(2)}x</span>
-                <span style={{ fontSize: '8px', color: '#888' }}>r:{rowsFromCenterFloat.toFixed(1)}</span>
-                {isHologram && <span className="bet-marker-timeframe">{bet.timeframe}</span>}
-              </>
-            )}
-          </div>
-        );
-      });
-  }, [bets, displayPrice, rowSizePct, rowOffset, view, config.secondsPerBox, nowColIdx, colOffset, smoothScrollX, gridWidth]);
+  // ============ RENDER BET MARKERS (REMOVED) ============
+  // Bet markers are now rendered directly inside grid cells for perfect alignment.
 
   // ============ LOCK BODY SCROLL ============
   useEffect(() => {
@@ -892,17 +836,24 @@ export function TapTrading({ onClose }: TapTradingProps) {
           {/* Main content */}
           <div className="tap-main-content" ref={containerRef}>
             {/* Price labels */}
-            <div className="tap-price-labels" style={{ height: gridHeight }}>
-              {[...Array(VISIBLE_ROWS + 1)].map((_, i) => {
-                const centerRow = Math.floor(VISIBLE_ROWS / 2);
+            <div className="tap-price-labels" style={{ height: containerHeight }}>
+              {[...Array(visibleRows)].map((_, i) => {
+                const centerRow = Math.floor(visibleRows / 2);
                 const rowsFromCenter = i - centerRow + rowOffset;
                 const pctFromCenter = -rowsFromCenter * rowSizePct;
-                const price = displayPrice * (1 + pctFromCenter);
+                const price = gridCenterPrice * (1 + pctFromCenter);
+
+                // Calculate position relative to container center
+                const centerY = containerHeight / 2;
+                const topPos = centerY + (i - Math.floor(visibleRows / 2)) * CELL_HEIGHT - 8;
+
+                if (topPos < -50 || topPos > containerHeight + 50) return null;
+
                 return (
                   <div
                     key={i}
                     className="tap-price-label"
-                    style={{ top: i * CELL_HEIGHT - 8 }}
+                    style={{ top: topPos }}
                   >
                     ${price.toFixed(2)}
                   </div>
@@ -973,25 +924,42 @@ export function TapTrading({ onClose }: TapTradingProps) {
                 style={{ width: gridWidth, height: gridHeight }}
                 ref={gridRef}
               >
-                {/* Background gradient */}
-                <div className="tap-grid-bg" />
+                {/* Background gradient - follows the live dot */}
+                <div
+                  className="tap-grid-bg"
+                  style={{
+                    background: `linear-gradient(to bottom, 
+                      rgba(0, 255, 136, 0.1) 0%, 
+                      rgba(0, 255, 136, 0.02) ${dotYPos * 100 - 5}%, 
+                      rgba(255, 68, 68, 0.02) ${dotYPos * 100 + 5}%, 
+                      rgba(255, 68, 68, 0.1) 100%)`
+                  }}
+                />
 
                 {/* Canvas for chart - pointer-events: none so clicks pass through */}
                 <canvas
                   ref={canvasRef}
                   className="tap-chart-canvas"
-                  style={{ width: gridWidth, height: gridHeight, pointerEvents: 'none' }}
+                  style={{
+                    width: gridWidth,
+                    height: gridHeight,
+                    pointerEvents: 'none',
+                    marginTop: (containerHeight - gridHeight) / 2,
+                    transform: `translateY(${verticalOffset}px)`,
+                  }}
                 />
 
-                {/* Grid cells - scrolls smoothly, includes left buffer for fade-out */}
+                {/* Grid cells - scrolls smoothly in both X (time) and Y (price) */}
                 <div
                   className="tap-cells"
                   style={{
                     width: gridWidth + CELL_WIDTH * (LEFT_BUFFER_COLS + 2),
-                    transform: `translateX(${-smoothScrollX % CELL_WIDTH - LEFT_BUFFER_COLS * CELL_WIDTH}px)`,
+                    height: gridHeight,
+                    transform: `translate(${-smoothScrollX % CELL_WIDTH - LEFT_BUFFER_COLS * CELL_WIDTH}px, ${verticalOffset}px)`,
+                    marginTop: (containerHeight - gridHeight) / 2,
                   }}
                 >
-                  {[...Array(VISIBLE_ROWS)].map((_, visualRowIdx) => {
+                  {[...Array(visibleRows)].map((_, visualRowIdx) => {
                     const scrolledCols = Math.floor(smoothScrollX / CELL_WIDTH);
                     return (
                       <div
@@ -1000,39 +968,69 @@ export function TapTrading({ onClose }: TapTradingProps) {
                         style={{ top: visualRowIdx * CELL_HEIGHT, height: CELL_HEIGHT }}
                       >
                         {[...Array(visibleCols + LEFT_BUFFER_COLS + 2)].map((_, colIdx) => {
-                          // Adjust for left buffer offset
                           const actualColIdx = colIdx + scrolledCols - LEFT_BUFFER_COLS;
-                          const { rowsFromCenter, secondsLeft, multiplier, isNowCell, isPast, canBet, opacity } = getCellInfo(visualRowIdx, actualColIdx);
-                          const isLong = rowsFromCenter < 0;
-                          const isCenterRow = rowsFromCenter === 0;
+                          const { rowsFromCenter: cellRowsFromCenter, secondsLeft, multiplier, isNowCell, isPast, canBet, opacity: cellOpacityVal, isLong, isPriceInCell } = getCellInfo(visualRowIdx, actualColIdx);
 
-                          // Show multiplier for all non-past boxes, show '-' if can't bet (lockout)
-                          let displayText: string;
-                          if (isPast || opacity < 0.1) {
-                            displayText = '';
-                          } else if (multiplier > 1) {
-                            displayText = `${multiplier.toFixed(2)}x`;
-                          } else {
-                            displayText = '-';
+                          // Center row styling (rowsAway=0 relative to grid)
+                          const isCenterRow = cellRowsFromCenter === 0;
+
+                          // Find bet for this cell - match by stored row and column indices
+                          const cellBet = bets.find(b =>
+                            b.colIdxAtPlacement === actualColIdx &&
+                            Math.abs(b.rowsAwayAtPlacement - cellRowsFromCenter) < 0.5 &&
+                            b.timeframe === view
+                          );
+
+                          // Calculate bet marker opacity for resolved bets
+                          let betMarkerOpacity = 1;
+                          if (cellBet && cellBet.status !== 'open') {
+                            const now = Date.now();
+                            const resolvedAt = cellBet.touchedAt || cellBet.expiryAt;
+                            const msSinceResolved = now - resolvedAt;
+                            betMarkerOpacity = Math.max(0, 1 - msSinceResolved / 1500);
                           }
 
-                          // Don't render bets inside cells - they're rendered as overlay markers
+                          const statusClass = cellBet?.status === 'won' ? 'won' : cellBet?.status === 'lost' ? 'lost' : '';
+                          const isHologram = cellBet?.timeframe !== view;
+
                           return (
                             <button
                               key={`col-${colIdx}-row-${visualRowIdx}`}
-                              className={`tap-cell ${isLong ? 'long' : 'short'} ${isCenterRow ? 'center-row' : ''} ${isNowCell ? 'current-row' : ''} ${isPast ? 'past' : ''} ${!canBet && !isPast ? 'no-bet' : ''}`}
+                              className={`tap-cell ${isLong ? 'long' : 'short'} ${isCenterRow ? 'center-row' : ''} ${isNowCell ? 'current-row' : ''} ${isPriceInCell ? 'price-row' : ''} ${isPast ? 'past' : ''} ${!canBet && !isPast ? 'no-bet' : ''} ${cellBet ? `has-bet ${cellBet.direction.toLowerCase()} ${isHologram ? 'hologram' : ''} ${statusClass}` : ''}`}
                               style={{
                                 left: colIdx * CELL_WIDTH,
                                 width: CELL_WIDTH,
                                 height: CELL_HEIGHT,
-                                opacity: opacity,
+                                opacity: cellBet ? betMarkerOpacity : cellOpacityVal,
                               }}
-                              onClick={() => canBet && placeBet(rowsFromCenter, secondsLeft, actualColIdx)}
+                              onClick={() => canBet && placeBet(cellRowsFromCenter, secondsLeft, actualColIdx)}
                               disabled={!canBet}
                             >
-                              <span className={`cell-mult ${isPast ? 'past' : ''}`}>
-                                {displayText}
-                              </span>
+                              {cellBet ? (
+                                <>
+                                  {cellBet.status === 'won' ? (
+                                    <>
+                                      <span className="bet-marker-result">+${(cellBet.amount * cellBet.multiplierLocked - cellBet.amount).toFixed(2)}</span>
+                                      <span className="bet-marker-win-text">WIN!</span>
+                                    </>
+                                  ) : cellBet.status === 'lost' ? (
+                                    <>
+                                      <span className="bet-marker-result">-${cellBet.amount.toFixed(2)}</span>
+                                      <span className="bet-marker-loss-text">MISS</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="bet-marker-amount">${cellBet.amount}</span>
+                                      <span className="bet-marker-mult">{cellBet.multiplierLocked.toFixed(2)}x</span>
+                                      {isHologram && <span className="bet-marker-timeframe">{cellBet.timeframe}</span>}
+                                    </>
+                                  )}
+                                </>
+                              ) : (
+                                <span className={`cell-mult ${isPast ? 'past' : ''}`}>
+                                  {!isPast && cellOpacityVal >= 0.1 ? (multiplier > 1 ? `${multiplier.toFixed(2)}x` : '-') : ''}
+                                </span>
+                              )}
                             </button>
                           );
                         })}
@@ -1055,18 +1053,24 @@ export function TapTrading({ onClose }: TapTradingProps) {
                   );
                 })()}
 
-                {/* LIVE marker - FIXED position with NOW line */}
+                {/* LIVE marker - FIXED at visual center where the price dot always appears */}
                 {(() => {
                   const nowVisualCol = nowColIdx - colOffset;
                   const nowX = nowVisualCol * CELL_WIDTH + CELL_WIDTH / 2;
                   const isVisible = nowX >= 0 && nowX < gridWidth;
-                  if (!isVisible) return null;
+                  if (!isVisible || displayPrice === 0) return null;
+
+                  // With vertical scrolling, the dot is always at the visual center
+                  // Account for marginTop offset and the vertical transform
+                  const marginTop = (containerHeight - gridHeight) / 2;
+                  const dotY = marginTop + gridHeight / 2 + verticalOffset;
+
                   return (
                     <div
                       className="tap-live-marker"
                       style={{
                         left: nowX,
-                        top: gridHeight / 2 - rowOffset * CELL_HEIGHT,
+                        top: dotY,
                       }}
                     >
                       <span className="tap-live-label">LIVE</span>
@@ -1075,21 +1079,7 @@ export function TapTrading({ onClose }: TapTradingProps) {
                 })()}
               </div>
 
-              {/* Bet markers - positioned absolutely in grid wrapper to allow overflow */}
-              <div 
-                className="tap-bet-markers-container"
-                style={{ 
-                  position: 'absolute',
-                  top: TIME_HEADER_HEIGHT,
-                  left: 0,
-                  width: gridWidth,
-                  height: gridHeight,
-                  pointerEvents: 'none',
-                  overflow: 'visible',
-                }}
-              >
-                {renderBetMarkers}
-              </div>
+              {/* Bet markers container removed - integrated into cells */}
 
               {/* Scroll indicators */}
               <div className="tap-scroll-indicators">

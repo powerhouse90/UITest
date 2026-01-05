@@ -23,13 +23,24 @@
 
 /* Header */
 .tap-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+  border-bottom: none;
   flex-shrink: 0;
+  pointer-events: none;
+  /* Let clicks pass through except for buttons */
+}
+
+.tap-header>* {
+  pointer-events: auto;
 }
 
 .tap-token-info {
@@ -226,12 +237,21 @@
 
 /* Price display */
 .tap-price-display {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16px;
   padding: 8px 16px;
-  flex-shrink: 0;
+  z-index: 50;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  pointer-events: none;
 }
 
 .tap-current-price {
@@ -292,29 +312,35 @@
 
 /* Main content */
 .tap-main-content {
-  flex: 1;
+  position: absolute;
+  inset: 0;
   display: flex;
-  position: relative;
   overflow: hidden;
-  padding: 16px;
+  padding: 0;
 }
 
 /* Price labels */
 .tap-price-labels {
-  position: relative;
-  width: 80px;
-  flex-shrink: 0;
-  padding-top: 28px; /* Match time header height */
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 40;
+  background: linear-gradient(to right, rgba(10, 10, 10, 0.9) 0%, transparent 100%);
+  padding-left: 12px;
 }
 
 .tap-price-label {
   position: absolute;
-  right: 12px;
+  left: 8px;
   font-size: 10px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.6);
   white-space: nowrap;
   font-family: monospace;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 1);
 }
 
 /* Grid wrapper */
@@ -334,9 +360,13 @@
 
 /* Time header */
 .tap-time-header {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 30;
   flex-shrink: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   will-change: transform;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -371,7 +401,8 @@
 
 /* Grid */
 .tap-grid {
-  position: relative;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
 }
 
@@ -379,11 +410,10 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(to bottom,
-    rgba(0, 255, 136, 0.08) 0%,
-    rgba(0, 255, 136, 0.02) 45%,
-    rgba(255, 68, 68, 0.02) 55%,
-    rgba(255, 68, 68, 0.08) 100%
-  );
+      rgba(0, 255, 136, 0.08) 0%,
+      rgba(0, 255, 136, 0.02) 45%,
+      rgba(255, 68, 68, 0.02) 55%,
+      rgba(255, 68, 68, 0.08) 100%);
   z-index: 0;
   pointer-events: none;
 }
@@ -423,8 +453,10 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   cursor: pointer;
+  border-radius: 0;
+  /* No radius for standard grid */
   /* Don't transition opacity - it's updated every frame by JS for smooth scrolling */
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.1s, border-color 0.1s;
   padding: 0;
 }
 
@@ -438,11 +470,11 @@
 }
 
 .tap-cell.long {
-  border-left: 2px solid rgba(255, 215, 0, 0.3);
+  border-left: 2px solid rgba(0, 255, 136, 0.2);
 }
 
 .tap-cell.short {
-  border-left: 2px solid rgba(255, 215, 0, 0.3);
+  border-left: 2px solid rgba(255, 68, 68, 0.2);
 }
 
 .tap-cell.past {
@@ -466,11 +498,24 @@
   background: rgba(255, 215, 0, 0.08);
 }
 
+/* Price row - current live price is in this row (1.01x multiplier) */
+.tap-cell.price-row:not(.past) {
+  background: rgba(255, 215, 0, 0.15) !important;
+  border-color: rgba(255, 215, 0, 0.4) !important;
+  box-shadow: inset 0 0 30px rgba(255, 215, 0, 0.2), 0 0 15px rgba(255, 215, 0, 0.1);
+}
+
+.tap-cell.price-row .cell-mult {
+  color: #FFD700;
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
 /* Current row - price is here */
 .tap-cell.current-row {
-  background: rgba(255, 215, 0, 0.25) !important;
-  border-color: rgba(255, 215, 0, 0.5) !important;
-  box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.2);
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.05);
 }
 
 .tap-cell.current-row .current-label {
@@ -482,9 +527,109 @@
 }
 
 /* Has active bet */
-.tap-cell.has-bet {
-  background: rgba(255, 215, 0, 0.15);
-  border: 2px solid rgba(255, 215, 0, 0.5);
+.tap-cell.has-bet.long {
+  background: rgba(0, 255, 136, 0.2);
+  border: 2px solid rgba(0, 255, 136, 0.8) !important;
+  border-radius: 8px;
+  z-index: 10;
+  animation: bet-pulse-long 2s ease-in-out infinite;
+}
+
+.tap-cell.has-bet.short {
+  background: rgba(255, 68, 68, 0.2);
+  border: 2px solid rgba(255, 68, 68, 0.8) !important;
+  border-radius: 8px;
+  z-index: 10;
+  animation: bet-pulse-short 2s ease-in-out infinite;
+}
+
+.tap-cell.has-bet.won.long {
+  animation: win-burst-cell-long 1s ease-out forwards;
+}
+
+.tap-cell.has-bet.won.short {
+  animation: win-burst-cell-short 1s ease-out forwards;
+}
+
+.tap-cell.has-bet.lost {
+  background: rgba(128, 128, 128, 0.3) !important;
+  border: 2px solid rgba(128, 128, 128, 0.6) !important;
+  animation: loss-poof-cell 1s ease-out forwards;
+}
+
+@keyframes bet-pulse-long {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.8), 0 0 30px rgba(0, 255, 136, 0.4);
+  }
+}
+
+@keyframes bet-pulse-short {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(255, 68, 68, 0.8), 0 0 30px rgba(255, 68, 68, 0.4);
+  }
+}
+
+@keyframes win-burst-cell-long {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+  }
+
+  30% {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 1);
+  }
+
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+    box-shadow: 0 0 50px rgba(0, 255, 136, 0.8);
+  }
+}
+
+@keyframes win-burst-cell-short {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.8);
+  }
+
+  30% {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px rgba(255, 68, 68, 1);
+  }
+
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+    box-shadow: 0 0 50px rgba(255, 68, 68, 0.8);
+  }
+}
+
+@keyframes loss-poof-cell {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.8);
+    opacity: 0;
+    filter: blur(4px);
+  }
 }
 
 /* Cell multiplier */
@@ -509,7 +654,7 @@
 .bet-amount {
   font-size: 10px;
   font-weight: 700;
-  color: #FFD700;
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .bet-mult {
@@ -525,10 +670,9 @@
   bottom: 0;
   width: 2px;
   background: linear-gradient(to bottom,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.4) 50%,
-    rgba(255, 255, 255, 0.1) 100%
-  );
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0.1) 100%);
   z-index: 10;
   pointer-events: none;
   transform: translateX(-1px);
@@ -567,22 +711,27 @@
 }
 
 @keyframes bet-pulse {
-  0%, 100% { 
+
+  0%,
+  100% {
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
   }
-  50% { 
+
+  50% {
     box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 30px rgba(255, 215, 0, 0.4);
   }
 }
 
 .bet-marker.long {
-  background: rgba(255, 215, 0, 0.25);
-  border: 2px solid rgba(255, 215, 0, 0.8);
+  background: rgba(0, 255, 136, 0.25);
+  border: 2px solid rgba(0, 255, 136, 0.8);
+  animation: bet-pulse-long 2s ease-in-out infinite;
 }
 
 .bet-marker.short {
-  background: rgba(255, 215, 0, 0.25);
-  border: 2px solid rgba(255, 215, 0, 0.8);
+  background: rgba(255, 68, 68, 0.25);
+  border: 2px solid rgba(255, 68, 68, 0.8);
+  animation: bet-pulse-short 2s ease-in-out infinite;
 }
 
 /* Hologram style for bets from other timeframes */
@@ -593,8 +742,15 @@
 }
 
 @keyframes hologram-flicker {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.5; }
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .bet-marker-mult {
@@ -607,7 +763,7 @@
 .bet-marker-amount {
   font-size: 12px;
   font-weight: 700;
-  color: #FFD700;
+  color: #fff;
 }
 
 .bet-marker-timeframe {
@@ -619,32 +775,59 @@
 }
 
 /* Win/Loss animations */
-.bet-marker.won {
-  background: rgba(255, 215, 0, 0.5) !important;
-  border: 2px solid rgba(255, 215, 0, 1) !important;
-  animation: win-burst 1s ease-out forwards !important;
+.bet-marker.won.long {
+  background: rgba(0, 255, 136, 0.5) !important;
+  border: 2px solid rgba(0, 255, 136, 1) !important;
+  animation: win-burst-long 1s ease-out forwards !important;
+}
+
+.bet-marker.won.short {
+  background: rgba(255, 68, 68, 0.5) !important;
+  border: 2px solid rgba(255, 68, 68, 1) !important;
+  animation: win-burst-short 1s ease-out forwards !important;
 }
 
 .bet-marker.lost {
-  background: rgba(128, 128, 128, 0.5) !important;
-  border: 2px solid rgba(128, 128, 128, 1) !important;
+  background: rgba(128, 128, 128, 0.3) !important;
+  border: 2px solid rgba(128, 128, 128, 0.6) !important;
   animation: loss-poof 1s ease-out forwards !important;
 }
 
-@keyframes win-burst {
+@keyframes win-burst-long {
   0% {
     transform: scale(1);
     opacity: 1;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
   }
+
   30% {
     transform: scale(1.15);
-    box-shadow: 0 0 30px rgba(255, 215, 0, 1), 0 0 60px rgba(255, 215, 0, 0.6);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 1), 0 0 60px rgba(0, 255, 136, 0.6);
   }
+
   100% {
     transform: scale(1.3);
     opacity: 0;
-    box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), 0 0 100px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 0 50px rgba(0, 255, 136, 0.8), 0 0 100px rgba(0, 255, 136, 0.4);
+  }
+}
+
+@keyframes win-burst-short {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.8);
+  }
+
+  30% {
+    transform: scale(1.15);
+    box-shadow: 0 0 30px rgba(255, 68, 68, 1), 0 0 60px rgba(255, 68, 68, 0.6);
+  }
+
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+    box-shadow: 0 0 50px rgba(255, 68, 68, 0.8), 0 0 100px rgba(255, 68, 68, 0.4);
   }
 }
 
@@ -654,11 +837,13 @@
     opacity: 1;
     filter: blur(0);
   }
+
   50% {
     transform: scale(0.9);
     opacity: 0.6;
     filter: blur(2px);
   }
+
   100% {
     transform: scale(0.5);
     opacity: 0;
@@ -672,8 +857,12 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
-.bet-marker.won .bet-marker-result {
-  color: #FFD700;
+.bet-marker.won.long .bet-marker-result {
+  color: #00ff88;
+}
+
+.bet-marker.won.short .bet-marker-result {
+  color: #ff4444;
 }
 
 .bet-marker.lost .bet-marker-result {
@@ -683,9 +872,16 @@
 .bet-marker-win-text {
   font-size: 10px;
   font-weight: 800;
-  color: #FFD700;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
   animation: win-text-pulse 0.3s ease-out;
+}
+
+.bet-marker.won.long .bet-marker-win-text {
+  color: #00ff88;
+}
+
+.bet-marker.won.short .bet-marker-win-text {
+  color: #ff4444;
 }
 
 .bet-marker-loss-text {
@@ -696,9 +892,17 @@
 }
 
 @keyframes win-text-pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.3);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 /* Scroll indicators */
@@ -932,14 +1136,30 @@
 
 /* Win/Lose animations */
 @keyframes cell-win {
-  0% { background: rgba(0, 255, 136, 0.3); transform: scale(1); }
-  50% { background: rgba(0, 255, 136, 0.6); transform: scale(1.05); }
-  100% { background: rgba(0, 255, 136, 0.1); transform: scale(1); }
+  0% {
+    background: rgba(0, 255, 136, 0.3);
+    transform: scale(1);
+  }
+
+  50% {
+    background: rgba(0, 255, 136, 0.6);
+    transform: scale(1.05);
+  }
+
+  100% {
+    background: rgba(0, 255, 136, 0.1);
+    transform: scale(1);
+  }
 }
 
 @keyframes cell-lose {
-  0% { background: rgba(255, 68, 68, 0.3); }
-  100% { background: rgba(255, 68, 68, 0.05); }
+  0% {
+    background: rgba(255, 68, 68, 0.3);
+  }
+
+  100% {
+    background: rgba(255, 68, 68, 0.05);
+  }
 }
 
 .tap-cell.won {
